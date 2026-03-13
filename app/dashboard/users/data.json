@@ -1,0 +1,296 @@
+[
+  {
+    "id": 1,
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@example.com",
+    "avatar": "SJ",
+    "role": "Admin",
+    "plan": "Enterprise",
+    "billing": "Lorem",
+    "status": "Active",
+    "joinedDate": "2024-01-15",
+    "lastLogin": "2024-08-12",
+    "profession": "Physical Therapist",
+    "licenseNumber": "PT-2024-001234",
+    "licenseExpiry": "2025-12-31",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 12,
+      "totalCoursesCompleted": 8,
+      "totalCEHours": 24.5,
+      "certificatesUploaded": 6,
+      "recentActivity": "Completed 'Advanced Manual Therapy' course"
+    },
+    "courses": [
+      {
+        "id": 1,
+        "name": "Advanced Manual Therapy",
+        "status": "Completed",
+        "hoursCompleted": 8.0,
+        "hoursRequired": 8.0,
+        "certificateUploaded": true
+      },
+      {
+        "id": 2,
+        "name": "Sports Injury Rehabilitation",
+        "status": "In Progress",
+        "hoursCompleted": 4.5,
+        "hoursRequired": 6.0,
+        "certificateUploaded": false
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Michael Chen",
+    "email": "michael.chen@example.com",
+    "avatar": "MC",
+    "role": "Editor",
+    "plan": "Professional",
+    "billing": "Auto Debit",
+    "status": "Active",
+    "joinedDate": "2024-02-20",
+    "lastLogin": "2024-08-13",
+    "profession": "Occupational Therapist",
+    "licenseNumber": "OT-2023-005678",
+    "licenseExpiry": "2024-11-30",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 8,
+      "totalCoursesCompleted": 5,
+      "totalCEHours": 18.0,
+      "certificatesUploaded": 4,
+      "recentActivity": "Started 'Pediatric Occupational Therapy' course"
+    },
+    "courses": [
+      {
+        "id": 3,
+        "name": "Pediatric Occupational Therapy",
+        "status": "In Progress",
+        "hoursCompleted": 3.0,
+        "hoursRequired": 6.0,
+        "certificateUploaded": false
+      },
+      {
+        "id": 4,
+        "name": "Hand Therapy Techniques",
+        "status": "Completed",
+        "hoursCompleted": 4.0,
+        "hoursRequired": 4.0,
+        "certificateUploaded": true
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Emily Rodriguez",
+    "email": "emily.rodriguez@example.com",
+    "avatar": "ER",
+    "role": "Author",
+    "plan": "Basic",
+    "billing": "Stripe",
+    "status": "Suspended",
+    "joinedDate": "2024-03-10",
+    "lastLogin": "2024-08-10",
+    "profession": "Speech-Language Pathologist",
+    "licenseNumber": "SLP-2024-009012",
+    "licenseExpiry": "2025-06-30",
+    "activityStatus": "Inactive",
+    "studySummary": {
+      "totalCoursesAdded": 5,
+      "totalCoursesCompleted": 2,
+      "totalCEHours": 8.5,
+      "certificatesUploaded": 2,
+      "recentActivity": "No recent activity"
+    },
+    "courses": [
+      {
+        "id": 5,
+        "name": "Child Language Development",
+        "status": "Completed",
+        "hoursCompleted": 3.5,
+        "hoursRequired": 3.5,
+        "certificateUploaded": true
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "David Thompson",
+    "email": "david.thompson@example.com",
+    "avatar": "DT",
+    "role": "Maintainer",
+    "plan": "Enterprise",
+    "billing": "Auto Debit",
+    "status": "Active",
+    "joinedDate": "2024-01-25",
+    "lastLogin": "2024-08-13",
+    "profession": "Chiropractor",
+    "licenseNumber": "DC-2023-003456",
+    "licenseExpiry": "2024-12-31",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 15,
+      "totalCoursesCompleted": 10,
+      "totalCEHours": 32.0,
+      "certificatesUploaded": 8,
+      "recentActivity": "Completed 'Spinal Manipulation Techniques' course"
+    },
+    "courses": [
+      {
+        "id": 6,
+        "name": "Spinal Manipulation Techniques",
+        "status": "Completed",
+        "hoursCompleted": 6.0,
+        "hoursRequired": 6.0,
+        "certificateUploaded": true
+      },
+      {
+        "id": 7,
+        "name": "Sports Chiropractic",
+        "status": "In Progress",
+        "hoursCompleted": 2.0,
+        "hoursRequired": 4.0,
+        "certificateUploaded": false
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Jessica Parker",
+    "email": "jessica.parker@example.com",
+    "avatar": "JP",
+    "role": "Subscriber",
+    "plan": "Basic",
+    "billing": "Lorem",
+    "status": "Deactivated",
+    "joinedDate": "2024-04-05",
+    "lastLogin": "2024-07-20",
+    "profession": "Physical Therapist Assistant",
+    "licenseNumber": "PTA-2024-007890",
+    "licenseExpiry": "2025-03-31",
+    "activityStatus": "Inactive",
+    "studySummary": {
+      "totalCoursesAdded": 3,
+      "totalCoursesCompleted": 1,
+      "totalCEHours": 4.0,
+      "certificatesUploaded": 1,
+      "recentActivity": "No recent activity"
+    },
+    "courses": [
+      {
+        "id": 8,
+        "name": "Basic Rehabilitation Techniques",
+        "status": "Completed",
+        "hoursCompleted": 4.0,
+        "hoursRequired": 4.0,
+        "certificateUploaded": true
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Robert Wilson",
+    "email": "robert.wilson@example.com",
+    "avatar": "RW",
+    "role": "Admin",
+    "plan": "Professional",
+    "billing": "Auto Debit",
+    "status": "Active",
+    "joinedDate": "2024-02-14",
+    "lastLogin": "2024-08-12",
+    "profession": "Physical Therapist",
+    "licenseNumber": "PT-2023-002345",
+    "licenseExpiry": "2024-10-31",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 10,
+      "totalCoursesCompleted": 7,
+      "totalCEHours": 21.5,
+      "certificatesUploaded": 5,
+      "recentActivity": "Started 'Geriatric Physical Therapy' course"
+    },
+    "courses": [
+      {
+        "id": 9,
+        "name": "Geriatric Physical Therapy",
+        "status": "In Progress",
+        "hoursCompleted": 2.5,
+        "hoursRequired": 5.0,
+        "certificateUploaded": false
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Amanda Foster",
+    "email": "amanda.foster@example.com",
+    "avatar": "AF",
+    "role": "Author",
+    "plan": "Professional",
+    "billing": "Stripe",
+    "status": "Active",
+    "joinedDate": "2024-03-22",
+    "lastLogin": "2024-08-08",
+    "profession": "Occupational Therapist",
+    "licenseNumber": "OT-2024-004567",
+    "licenseExpiry": "2025-09-30",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 6,
+      "totalCoursesCompleted": 4,
+      "totalCEHours": 14.0,
+      "certificatesUploaded": 3,
+      "recentActivity": "Completed 'Neurological Rehabilitation' course"
+    },
+    "courses": []
+  },
+  {
+    "id": 8,
+    "name": "Christopher Lee",
+    "email": "christopher.lee@example.com",
+    "avatar": "CL",
+    "role": "Editor",
+    "plan": "Enterprise",
+    "billing": "Auto Debit",
+    "status": "Active",
+    "joinedDate": "2024-01-30",
+    "lastLogin": "2024-08-13",
+    "profession": "Physical Therapist",
+    "licenseNumber": "PT-2023-001234",
+    "licenseExpiry": "2024-12-15",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 18,
+      "totalCoursesCompleted": 12,
+      "totalCEHours": 36.0,
+      "certificatesUploaded": 10,
+      "recentActivity": "Completed 'Advanced Orthopedic Assessment'"
+    },
+    "courses": []
+  },
+  {
+    "id": 9,
+    "name": "Lisa Martinez",
+    "email": "lisa.martinez@example.com",
+    "avatar": "LM",
+    "role": "Maintainer",
+    "plan": "Basic",
+    "billing": "Lorem",
+    "status": "Active",
+    "joinedDate": "2024-04-18",
+    "lastLogin": "2024-08-11",
+    "profession": "Speech-Language Pathologist",
+    "licenseNumber": "SLP-2024-006789",
+    "licenseExpiry": "2025-08-31",
+    "activityStatus": "Recently active",
+    "studySummary": {
+      "totalCoursesAdded": 4,
+      "totalCoursesCompleted": 2,
+      "totalCEHours": 8.0,
+      "certificatesUploaded": 2,
+      "recentActivity": "Started 'Adult Neurogenic Disorders' course"
+    },
+    "courses": []
+  }
+]
