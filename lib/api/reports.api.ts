@@ -16,9 +16,9 @@ export const getReportsUsers = async (params: GetReportsUsersParams = {}) => {
     const {
       page = 1,
       limit = 10,
-      search,
-      accountStatus,
-      licenseExpired,
+      search = "",
+      accountStatus = "all",
+      licenseExpired = "all",
       startDate,
       endDate,
     } = params;

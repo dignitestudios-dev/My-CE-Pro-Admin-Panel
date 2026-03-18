@@ -2,73 +2,58 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Link } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-
-import { fetchUserById } from "@/lib/slices/userSlice";
+import {
+  deactivateUser,
+  fetchUserById,
+  fetchUserCourses,
+  reactivateUser,
+} from "@/lib/slices/userSlice";
 import { AppDispatch, RootState } from "@/lib/store";
-
-interface User {
-  id: string;
-  fullName: string;
-  email: string;
-  profession: string;
-  department: string;
-  phoneNumber: string;
-  licenseNumber: string;
-  licenseExpiry: string;
-  accountStatus: "Active" | "Inactive" | "Suspended";
-  lastActivity: string;
-  registrationDate: string;
-  avatarUrl?: string;
-}
-
-interface StudySummary {
-  totalCoursesAdded: number;
-  totalCoursesCompleted: number;
-  totalCEHours: number;
-  certificateUploads: number;
-  recentActivity: string;
-}
-
-interface Course {
-  id: string;
-  name: string;
-  institution: string;
-  status: "In Progress" | "Completed";
-  hoursCompleted: number;
-  hoursRequired: number;
-  certificateUploaded: boolean;
-  completionYear?: string;
-}
+import CourseDetailModal, { Course } from "../components/course-detail-modal";
 
 export default function IdPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { userDetail, loading, error } = useSelector((state: RootState) => state.users);
+  const { userDetail, loading, userCourses } = useSelector((state: RootState) => state.users);
+
   const params = useParams();
   const { id } = params;
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showActionMenu, setShowActionMenu] = useState(false);
 
   useEffect(() => {
-    if (id && typeof id === 'string') {
+    if (id && typeof id === "string") {
       dispatch(fetchUserById(id));
     }
-  }, [id, dispatch])
-  // Dummy user data; aap real API call se replace kar sakte ho
-  
-  const studySummary: StudySummary = {
-    totalCoursesAdded: 12,
-    totalCoursesCompleted: 8,
-    totalCEHours: 24.5,
-    certificateUploads: 8,
-    recentActivity: 'Completed "Patient Safety" course on Feb 20, 2024',
+  }, [id, dispatch]);
+
+ const handleCourseClick = (courseId: string) => {
+    if (id && typeof id === "string") {
+      dispatch(fetchUserCourses(courseId));
+     setSelectedCourse(userCourses)
+      setIsModalOpen(true);
+    }
   };
 
-  
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedCourse(null);
+  };
 
+  const handleDeactivate = () => {
+    if (!userDetail?._id) return;
+    dispatch(deactivateUser(userDetail._id));
+    setShowActionMenu(false);
+  };
 
-   
+  const handleActivate = () => {
+    if (!userDetail?._id) return;
+    dispatch(reactivateUser(userDetail._id));
+    setShowActionMenu(false);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
@@ -81,26 +66,47 @@ export default function IdPage() {
         return "bg-gray-100 text-gray-700";
     }
   };
-    const user = {
+
+  // ✅ Map API data to UI
+  const user = {
     id: userDetail?._id || "",
     fullName: userDetail?.fullName || "Unknown",
     email: userDetail?.emailAddress || "",
     profession: userDetail?.profession || "-",
-    department: "-", // agar API me nahi hai
-    phoneNumber: "-", // agar API me nahi hai
     licenseNumber: userDetail?.licenseNumber?.toString() || "-",
     licenseExpiry: userDetail?.licenseExpiry || "",
     accountStatus: userDetail?.accountStatus ? "Active" : "Inactive",
     lastActivity: userDetail?.lastActivity || "",
-    registrationDate: "-", // agar API me nahi hai
+    totalCourses: userDetail?.totalCourses ?? 0,
+    completedCourses: userDetail?.completedCourses ?? 0,
+    totalCEMinutes: userDetail?.totalCEMinutes ?? 0,
+    certificateUploadCount: userDetail?.certificateUploadCount ?? 0,
     avatarUrl: `https://ui-avatars.com/api/?name=${userDetail?.fullName || "User"}`,
-    totalCourses: 0, // Default values since not in API
-    courses: [], // Default empty array
-    completedCourses: 0, // Default value
-    totalCEMinutes: 0, // Default value
-    certificateUploadCount: 0 // Default value
+    courses:
+      userDetail?.courses?.map((course: any) => ({
+        _id: course._id,
+        name: course.name,
+        institute: course.institute || course.institution || "-",
+        startDate: course.startDate || null,
+        endDate: course.endDate || null,
+        certificate: course.certificate || null,
+        minsRequired: course.minsRequired,
+        completedMinutes: course.completedMinutes,
+        status: (
+          course.status?.toLowerCase() === "completed"
+            ? "completed"
+            : course.status?.toLowerCase() === "inprogress"
+            ? "inProgress"
+            : course.status?.toLowerCase() === "active"
+            ? "active"
+            : "pending"
+        ) as "pending" | "active" | "completed" | "inProgress",
+        completionPercentage: Math.min(
+          (course.completedMinutes / course.minsRequired) * 100,
+          100
+        ),
+      })) || [],
   };
-
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -110,50 +116,27 @@ export default function IdPage() {
           onClick={() => window.history.back()}
           className="mb-6 p-2 hover:bg-gray-200 rounded-full transition-colors inline-flex items-center gap-2"
         >
-          <svg
-            className="w-5 h-5 text-gray-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
           <span className="text-sm text-gray-700">Back to Users</span>
         </button>
 
-        {/* Header Card with shade */}
+        {/* Header Card */}
         <div className="bg-white shadow-md rounded-lg border border-gray-200 p-6 mb-4">
           <div className="flex items-start justify-between">
             <div className="flex gap-4">
-              {/* Avatar */}
               <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                {user.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 text-2xl font-bold">
-                    {user.fullName.charAt(0)}
-                  </div>
-                )}
+                <img
+                  src={user.avatarUrl}
+                  alt={user.fullName}
+                  className="w-full h-full object-cover"
+                />
               </div>
-
-              {/* User Info */}
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1 flex flex-col items-start justify-start ">
-                  {user.fullName} 
-                
-                  <span>{user?.email}</span>
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                  {user.fullName}
+                  <span>{user.email}</span>
                 </h1>
                 <p className="text-sm text-blue-600 font-medium mb-2">
-                  {user.profession} | {user.department}
+                  {user.profession}
                 </p>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
@@ -173,55 +156,27 @@ export default function IdPage() {
               >
                 Actions
               </button>
-
               {showActionMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                   <button
-                    onClick={() => {
-                      console.log("Activate", user.id);
-                      setShowActionMenu(false);
-                    }}
+                    onClick={handleActivate}
                     className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm text-gray-700"
                   >
                     Activate Account
                   </button>
                   <button
-                    onClick={() => {
-                      console.log("Deactivate", user.id);
-                      setShowActionMenu(false);
-                    }}
+                    onClick={handleDeactivate}
                     className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm text-gray-700"
                   >
                     Deactivate Account
                   </button>
-                  <div className="border-t border-gray-100 my-1"></div>
-                  <button
-                    onClick={() => {
-                      console.log("Suspend", user.id);
-                      setShowActionMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left hover:bg-red-50 text-sm text-red-600"
-                  >
-                    Suspend User
-                  </button>
                 </div>
-              
               )}
-             <div>
-  {user.licenseExpiry
-    ? new Date(user.licenseExpiry).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "N/A"}
-</div>
             </div>
-            
           </div>
         </div>
 
-        {/* Study Summary Card with shade */}
+        {/* Study Summary */}
         <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-4">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Study Summary</h2>
           <div className="grid grid-cols-4 gap-6">
@@ -235,7 +190,7 @@ export default function IdPage() {
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Total CE Hours</p>
-              <p className="text-3xl font-bold text-blue-600">{ user?.totalCEMinutes}</p>
+              <p className="text-3xl font-bold text-blue-600">{user.totalCEMinutes}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Certificates Uploaded</p>
@@ -244,72 +199,66 @@ export default function IdPage() {
           </div>
         </div>
 
-        {/* Courses Card with shade */}
+        {/* Course Summary */}
         <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-4">
-  <h2 className="text-lg font-semibold text-gray-700 mb-4">Course Summary</h2>
-  {user.courses.map((course: any) => (
-    <div
-      key={course.id}
-      className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 cursor-pointer hover:bg-gray-50 "
-     >
-      {/* Top row: Name, Institution, Year */}
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <h3 className="font-semibold text-gray-900">{course.name}</h3>
-          <p className="text-sm text-gray-500">{course.institution}</p>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Course Summary</h2>
+          {user.courses.map((course) => {
+            const progressPercent = Math.min(
+              (course.completedMinutes / course.minsRequired) * 100,
+              100
+            );
+            const isCompleted = course.status === "completed";
+            return (
+              <div
+                key={course._id}
+                onClick={() => handleCourseClick(course._id)}
+                className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 cursor-pointer hover:bg-gray-50 rounded-lg px-2 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{course.name}</h3>
+                    <p className="text-sm text-gray-500">{course.institute}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                    <span
+                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                        isCompleted ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                      }`}
+                    >
+                      {isCompleted ? "Completed" : "In Progress"}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Minutes Progress</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {course.completedMinutes} / {course.minsRequired} mins
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className={`h-1.5 rounded-full ${isCompleted ? "bg-green-500" : "bg-blue-500"}`}
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <span className="text-sm font-semibold">{course.completionYear}</span>
       </div>
 
-      {/* Status / Hours / Certificate */}
-      <div className="grid grid-cols-3 gap-4 mt-2">
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Status</p>
-          <span
-            className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-              course.status === "Completed"
-                ? "bg-green-100 text-green-700"
-                : "bg-blue-100 text-blue-700"
-            }`}
-          >
-            {course.status}
-          </span>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Hours Progress</p>
-          <p className="text-sm font-semibold text-gray-900">
-            {course.hoursCompleted} / {course.hoursRequired} hrs
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Certificate</p>
-          <p
-            className={`text-sm font-semibold ${
-              course.certificateUploaded ? "text-green-600" : "text-gray-400"
-            }`}
-          >
-            {course.certificateUploaded ? "Uploaded" : "Not Uploaded"}
-          </p>
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="mt-3">
-        <div className="w-full bg-gray-200 rounded-full h-1.5">
-          <div
-            className={`h-1.5 rounded-full ${
-              course.status === "Completed" ? "bg-green-500" : "bg-blue-500"
-            }`}
-            style={{
-              width: `${(course.hoursCompleted / course.hoursRequired) * 100}%`,
-            }}
-          />
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
-      </div>
+      {/* Course Detail Modal */}
+      <CourseDetailModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        data={selectedCourse}
+        loading={loading}
+      />
     </div>
   );
 }

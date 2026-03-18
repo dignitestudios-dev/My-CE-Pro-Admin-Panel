@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface ChartData {
@@ -43,7 +44,10 @@ export default function HeavyChartsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-lg text-gray-500">Loading heavy charts...</p>
+        <div className="text-center">
+          <LoadingSpinner size="lg" />
+          <p className="text-lg text-gray-500 mt-4">Loading heavy charts...</p>
+        </div>
       </div>
     );
   }

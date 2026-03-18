@@ -10,7 +10,7 @@ export interface DashboardStats {
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   try {
     const response = await API.get("/admin/dashboard");
-    return response.data;
+    return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to fetch dashboard stats");
   }

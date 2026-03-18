@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface DataItem {
@@ -46,7 +48,10 @@ export default function HeavyDataPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-lg text-gray-500">Loading 1000 rows of data...</p>
+        <div className="text-center">
+          <LoadingSpinner size="lg" />
+          <p className="text-lg text-gray-500 mt-4">Loading 1000 rows of data...</p>
+        </div>
       </div>
     );
   }

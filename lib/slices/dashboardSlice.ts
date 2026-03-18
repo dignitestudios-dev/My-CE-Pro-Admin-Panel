@@ -20,6 +20,7 @@ export const fetchDashboardStats = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const data = await getDashboardStats();
+
       return data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.message);

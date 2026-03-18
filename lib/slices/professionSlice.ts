@@ -32,14 +32,18 @@ export const fetchProfessions = createAsyncThunk(
   async (params: FetchProfessionsParams = {}, thunkAPI) => {
     try {
       const { page = 1, limit = 10 } = params;
-      const response = await getProfessions(page, limit);
+
+      const response = await getProfessions({
+        page,
+        limit,
+      });
+
       return response;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.message);
     }
   }
 );
-
 const professionSlice = createSlice({
   name: "profession",
   initialState,
@@ -50,15 +54,18 @@ const professionSlice = createSlice({
       state.error = null;
     });
 
-    builder.addCase(fetchProfessions.fulfilled, (state, action) => {
-      state.loading = false;
+   builder.addCase(fetchProfessions.fulfilled, (state, action) => {
+  state.loading = false;
 
-      // API response ke hisab se
-      const professionsData = action.payload?.data || [];
+  state.professions = action.payload?.data || [];
 
-      state.professions = professionsData;
-      state.pagination = action.payload?.pagination || null;
-    });
+  // ✅ IMPORTANT FIX
+  state.pagination = action.payload?.pagination || {
+    currentPage: 1,
+    itemsPerPage: 10,
+    totalPages: 1,
+  };
+});
 
     builder.addCase(fetchProfessions.rejected, (state, action) => {
       state.loading = false;

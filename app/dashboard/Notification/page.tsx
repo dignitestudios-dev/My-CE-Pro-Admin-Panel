@@ -58,7 +58,7 @@ export default function Notification() {
 
       {/* Data Table */}
       <div className="p-4">
-        <DataTable notifications={notifications} pagination={paginationData} />
+        <DataTable notifications={notifications} pagination={paginationData} loading={loading} />
       </div>
     </div>
   );

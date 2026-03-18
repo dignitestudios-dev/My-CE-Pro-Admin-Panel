@@ -16,11 +16,10 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import { AppDispatch } from "@/lib/store";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { fetchNotifications } from "@/lib/slices/notificationSlice";
-
-
+import { Loader2 } from "lucide-react"; // 🔹 Make sure Loader2 is imported
 
 interface DataTableProps {
   notifications: any[];
@@ -31,25 +30,18 @@ interface DataTableProps {
     setCurrentPage: (page: number) => void;
     setPageSize: (size: number) => void;
   };
+  loading: boolean;
 }
 
-export function DataTable({ notifications, pagination }: DataTableProps) {
+export function DataTable({ notifications, pagination, loading }: DataTableProps) {
   const dispatch = useDispatch<AppDispatch>();
 
-  
- 
-
-
-
-  // Fetch users whenever page, pageSize, debouncedSearch, or statusFilter changes
+  // Fetch notifications whenever page or pageSize changes
   useEffect(() => {
-   
     dispatch(
       fetchNotifications({
         page: pagination.currentPage,
         limit: pagination.itemsPerPage,
-     
-        // "active" = active, "deactivated" = deactivated, undefined = all
       })
     );
   }, [dispatch, pagination.currentPage, pagination.itemsPerPage]);
@@ -67,70 +59,61 @@ export function DataTable({ notifications, pagination }: DataTableProps) {
     if (pagination.currentPage < pagination.totalPages) pagination.setCurrentPage(pagination.currentPage + 1);
   };
 
-  
   return (
     <div className="w-full space-y-4">
- 
-     
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Scheduled At</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created At</TableHead>
+          
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-16">
+                  <Loader2 className="animate-spin mx-auto text-gray-500" size={32} />
+                </TableCell>
+              </TableRow>
+            ) : notifications
+              .map((notification) => (
+                <TableRow key={notification._id}>
+                  <TableCell>{notification.title || "-"}</TableCell>
+                  <TableCell>{notification.description || "-"}</TableCell>
+                  <TableCell>
+                    {notification.scheduledAt
+                      ? new Date(notification.scheduledAt).toLocaleString()
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={
+                        notification.status === "delivered"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }
+                    >
+                      {notification.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {notification.createdAt
+                      ? new Date(notification.createdAt).toLocaleString()
+                      : "-"}
+                  </TableCell>
+                
+                </TableRow>
+              ))
+            }
+          </TableBody>
+        </Table>
+      </div>
 
-<div className="rounded-md border">
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Title</TableHead>
-        <TableHead>Description</TableHead>
-        <TableHead>Scheduled At</TableHead>
-        <TableHead>Status</TableHead>
-        <TableHead>Created At</TableHead>
-        <TableHead>Actions</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {notifications.length ? (
-        notifications.map((notification) => (
-          <TableRow key={notification._id}>
-            <TableCell>{notification.title || "-"}</TableCell>
-            <TableCell>{notification.description || "-"}</TableCell>
-            <TableCell>
-              {notification.scheduledAt
-                ? new Date(notification.scheduledAt).toLocaleString()
-                : "-"}
-            </TableCell>
-            <TableCell>
-              <Badge
-                className={
-                  notification.status === "delivered"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }
-              >
-                {notification.status}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              {notification.createdAt
-                ? new Date(notification.createdAt).toLocaleString()
-                : "-"}
-            </TableCell>
-            <TableCell>
-              <Link href={`/dashboard/notifications/${notification._id}`}>
-                <Button variant="ghost" size="icon">
-                  <Eye className="size-4" />
-                </Button>
-              </Link>
-            </TableCell>
-          </TableRow>
-        ))
-      ) : (
-        <TableRow>
-          <TableCell colSpan={6} className="h-24 text-center">
-            No notifications found.
-          </TableCell>
-        </TableRow>
-      )}
-    </TableBody>
-  </Table>
-</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row items-center justify-between py-4 space-y-2 sm:space-y-0">
         <div className="flex items-center space-x-2">
