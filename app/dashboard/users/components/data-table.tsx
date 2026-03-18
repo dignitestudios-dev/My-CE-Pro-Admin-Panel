@@ -15,10 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Eye } from "lucide-react";
-import { AppDispatch } from "@/lib/store";
-import { fetchUsers } from "@/lib/slices/userSlice";
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import React from "react";
+import CourseDetailModal from "./course-detail-modal";
 
 interface User {
   _id: string;
@@ -32,6 +31,7 @@ interface User {
 
 interface DataTableProps {
   users: User[];
+  loading: boolean;
   pagination: {
     currentPage: number;
     itemsPerPage: number;
@@ -39,40 +39,40 @@ interface DataTableProps {
     setCurrentPage: (page: number) => void;
     setPageSize: (size: number) => void;
   };
+
+  // Filters passed from parent
+  search: string;
+  setSearch: (val: string) => void;
+  accountStatus: "all" | "active" | "deactivated";
+  setAccountStatus: (val: "all" | "active" | "deactivated") => void;
+  licenseExpired: "all" | "true" | "false";
+  setLicenseExpired: (val: "all" | "true" | "false") => void;
+  startDate: string;
+  setStartDate: (val: string) => void;
+  endDate: string;
+  setEndDate: (val: string) => void;
+  userCourses: any;
 }
 
-export function DataTable({ users, pagination }: DataTableProps) {
-  const dispatch = useDispatch<AppDispatch>();
-
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [accountStatusFilter, setAccountStatusFilter] = useState<"all" | "active" | "deactivated">("all");
-
-  // Debounce search input (2 sec)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  // Fetch users whenever page, pageSize, debouncedSearch, or statusFilter changes
-  useEffect(() => {
-    const statusParam =
-      accountStatusFilter === "all" ? undefined : accountStatusFilter;
-    dispatch(
-      fetchUsers({
-        page: pagination.currentPage,
-        limit: pagination.itemsPerPage,
-        search: debouncedSearch,
-        accountStatus: statusParam, // "active" = active, "deactivated" = deactivated, undefined = all
-      })
-    );
-  }, [dispatch, pagination.currentPage, pagination.itemsPerPage, debouncedSearch, accountStatusFilter]);
-
+export function DataTable({
+  users,
+  loading,
+  pagination,
+  search,
+  setSearch,
+  accountStatus,
+  setAccountStatus,
+  licenseExpired,
+  setLicenseExpired,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  
+}: DataTableProps) {
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     pagination.setPageSize(Number(e.target.value));
-    pagination.setCurrentPage(1); // Reset to first page
+    pagination.setCurrentPage(1);
   };
 
   const handlePreviousPage = () => {
@@ -90,30 +90,21 @@ export function DataTable({ users, pagination }: DataTableProps) {
     <div className="w-full space-y-4">
       {/* Filters */}
       <div className="grid gap-2 sm:grid-cols-5 sm:gap-4">
-        {/* Search */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Search by name/email</Label>
           <Input
             type="text"
             placeholder="Type to search..."
-            className="w-full pr-10"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              pagination.setCurrentPage(1);
-            }}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        {/* Account Status */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Account status</Label>
+          <Label className="text-sm font-medium">Account Status</Label>
           <select
-            value={accountStatusFilter}
-            onChange={(e) => {
-              setAccountStatusFilter(e.target.value as "all" | "active" | "deactivated");
-              pagination.setCurrentPage(1);
-            }}
+            value={accountStatus}
+            onChange={(e) => setAccountStatus(e.target.value as "all" | "active" | "deactivated")}
             className="w-full border rounded px-2 py-1"
           >
             <option value="all">All</option>
@@ -122,16 +113,27 @@ export function DataTable({ users, pagination }: DataTableProps) {
           </select>
         </div>
 
-        {/* License expiry */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">License expiry</Label>
-          <Input type="date" className="w-full pr-10" />
+          <Label className="text-sm font-medium">License Expired</Label>
+          <select
+            value={licenseExpired}
+            onChange={(e) => setLicenseExpired(e.target.value as "all" | "true" | "false")}
+            className="w-full border rounded px-2 py-1"
+          >
+            <option value="all">All</option>
+            <option value="true">Expired</option>
+            <option value="false">Not expired</option>
+          </select>
         </div>
 
-        {/* Registration date */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Registration date</Label>
-          <Input type="date" className="w-full pr-10" />
+          <Label className="text-sm font-medium">Start Date</Label>
+          <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">End Date</Label>
+          <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         </div>
       </div>
 
@@ -142,22 +144,27 @@ export function DataTable({ users, pagination }: DataTableProps) {
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Profession</TableHead>
-              <TableHead>License number</TableHead>
-              <TableHead>License expiry date</TableHead>
-              <TableHead>Account status</TableHead>
+              <TableHead>License Number</TableHead>
+              <TableHead>License Expiry</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {users.length ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  <LoadingSpinner size="md" />
+                </TableCell>
+              </TableRow>
+            ) : users.length ? (
               users.map((user) => (
                 <TableRow key={user._id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs font-medium">
-                          {user.fullName?.[0] || "U"}
-                        </AvatarFallback>
+                        <AvatarFallback>{user.fullName?.[0] || "U"}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="font-medium">{user.fullName || "Unknown"}</span>
@@ -165,6 +172,7 @@ export function DataTable({ users, pagination }: DataTableProps) {
                       </div>
                     </div>
                   </TableCell>
+
                   <TableCell>{user.profession || "-"}</TableCell>
                   <TableCell>{user.licenseNumber || "-"}</TableCell>
                   <TableCell>{user.licenseExpiry ? new Date(user.licenseExpiry).toLocaleDateString() : "-"}</TableCell>
@@ -173,6 +181,7 @@ export function DataTable({ users, pagination }: DataTableProps) {
                       {user.accountStatus ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
+
                   <TableCell>
                     <Link href={`/dashboard/users/${user._id}`}>
                       <Button variant="ghost" size="icon">
@@ -197,11 +206,7 @@ export function DataTable({ users, pagination }: DataTableProps) {
       <div className="flex flex-col sm:flex-row items-center justify-between py-4 space-y-2 sm:space-y-0">
         <div className="flex items-center space-x-2">
           <span className="text-sm">Items per page:</span>
-          <select
-            value={pagination.itemsPerPage}
-            onChange={handlePageSizeChange}
-            className="border rounded px-2 py-1 text-sm"
-          >
+          <select value={pagination.itemsPerPage} onChange={handlePageSizeChange} className="border rounded px-2 py-1 text-sm">
             {[5, 10, 20, 50].map((size) => (
               <option key={size} value={size}>{size}</option>
             ))}
@@ -209,27 +214,18 @@ export function DataTable({ users, pagination }: DataTableProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={pagination.currentPage <= 1}
-          >
+          <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={pagination.currentPage <= 1}>
             Previous
           </Button>
           <span className="text-sm font-medium">
             Page {pagination.currentPage} of {pagination.totalPages}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={pagination.currentPage >= pagination.totalPages}
-          >
+          <Button variant="outline" size="sm" onClick={handleNextPage} disabled={pagination.currentPage >= pagination.totalPages}>
             Next
           </Button>
         </div>
       </div>
+     
     </div>
   );
 }

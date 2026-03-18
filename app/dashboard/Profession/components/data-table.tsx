@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Eye } from "lucide-react";
@@ -36,25 +37,14 @@ interface DataTableProps {
 }
 
 export function DataTable({ professions, pagination, loading }: DataTableProps) {
-  const dispatch = useDispatch<AppDispatch>();
+ 
 
   
  
 
 
 
-  // Fetch users whenever page, pageSize, debouncedSearch, or statusFilter changes
-  useEffect(() => {
-   
-    dispatch(
-      fetchProfessions({
-        page: pagination.currentPage,
-        limit: pagination.itemsPerPage,
-     
-        // "active" = active, "deactivated" = deactivated, undefined = all
-      })
-    );
-  }, [dispatch, pagination.currentPage, pagination.itemsPerPage]);
+  
 
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     pagination.setPageSize(Number(e.target.value));
@@ -69,62 +59,47 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
     if (pagination.currentPage < pagination.totalPages) pagination.setCurrentPage(pagination.currentPage + 1);
   };
 
-  
   return (
     <div className="w-full space-y-4">
- 
-     
-<div className="rounded-md border">
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>#</TableHead>
-        <TableHead>Profession Name</TableHead>
-        <TableHead>CE Hours</TableHead>
-        <TableHead>Actions</TableHead>
-      </TableRow>
-    </TableHeader>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Profession Name</TableHead>
+              <TableHead>CE Hours</TableHead>
+              
+            </TableRow>
+          </TableHeader>
 
-    <TableBody>
-      {loading ? (
-        <TableRow>
-          <TableCell colSpan={4} className="h-24 text-center">
-            Loading...
-          </TableCell>
-        </TableRow>
-      ) : professions.length ? (
-        professions.map((profession, index) => (
-          <TableRow key={profession._id}>
-            
-            {/* Count */}
-            <TableCell>{index + 1}</TableCell>
-
-            <TableCell>{profession.name || "-"}</TableCell>
-
-            <TableCell>{profession.ceHours || "-"}</TableCell>
-
-            <TableCell>
-              <div className="flex gap-2">
-                <Link href={`/dashboard/professions/${profession._id}`}>
-                  <Button variant="ghost" size="icon">
-                    <Eye className="size-4" />
-                  </Button>
-                </Link>
-              </div>
-            </TableCell>
-
-          </TableRow>
-        ))
-      ) : (
-        <TableRow>
-          <TableCell colSpan={4} className="h-24 text-center">
-            No professions found.
-          </TableCell>
-        </TableRow>
-      )}
-    </TableBody>
-  </Table>
-</div>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="h-24 text-center">
+                  <LoadingSpinner size="md" />
+                </TableCell>
+              </TableRow>
+            ) : professions.length ? (
+              professions.map((profession, index) => (
+                <TableRow key={profession._id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{profession.name || "-"}</TableCell>
+                  <TableCell>{profession.ceHours || "-"}</TableCell>
+                  <TableCell>
+                   
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="h-24 text-center">
+                  No professions found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row items-center justify-between py-4 space-y-2 sm:space-y-0">
         <div className="flex items-center space-x-2">

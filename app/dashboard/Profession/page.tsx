@@ -6,12 +6,15 @@ import { DataTable } from "./components/data-table";
 import { AppDispatch, RootState } from "@/lib/store";
 import { useEffect, useState } from "react";
 import { fetchProfessions } from "@/lib/slices/professionSlice";
+import { Button } from "@/components/ui/button";
+import CreateProfessionModal from "./components/create-notification-modal";
 
 
 
 
 export default function Profession() {
   const dispatch = useDispatch<AppDispatch>();
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { professions, pagination, loading } = useSelector(
     (state: RootState) => state.profession
 
@@ -19,24 +22,40 @@ export default function Profession() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 const paginationData = {
-    currentPage: pagination?.currentPage ?? currentPage,
-    itemsPerPage: pagination?.itemsPerPage ?? pageSize,
-    totalPages: pagination?.totalPages ?? 1,
-    setCurrentPage: (page: number) => setCurrentPage(page),
-    setPageSize: (size: number) => {
-      setPageSize(size);
-      setCurrentPage(1); // reset to first page if page size changes
-    },
-  };
+  currentPage,
+  itemsPerPage: pageSize,
+  totalPages: pagination?.totalPages || 1,
+  setCurrentPage,
+  setPageSize,
+};
 
-;
-
+useEffect(() => {
+  dispatch(
+    fetchProfessions({
+      page: currentPage,
+      limit: pageSize,
+    })
+  );
+}, [dispatch, currentPage, pageSize]);
   
 
     return (
 
         <div>
+           <div className="flex justify-end mb-4">
+        <Button onClick={() => setShowCreateModal(true)}>Add Profession</Button>
+      </div>
            <DataTable professions={professions} pagination={paginationData} loading={loading} />
+           <CreateProfessionModal
+  showCreateModal={showCreateModal}
+  setShowCreateModal={setShowCreateModal}
+  onSuccess={() => dispatch(
+    fetchProfessions({
+      page: currentPage,
+      limit: pageSize,
+    })
+  )} // optional
+/>
         </div>
     );
 }

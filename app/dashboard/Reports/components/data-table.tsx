@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import React, { useState, useEffect } from "react";
@@ -217,8 +218,8 @@ export function DataTable({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  Loading...
+                <TableCell colSpan={6} className="text-center py-8">
+                  <LoadingSpinner size="md" />
                 </TableCell>
               </TableRow>
             ) : reports.length ? (

@@ -2,19 +2,20 @@
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/lib/store";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { fetchDashboardStats } from "@/lib/slices/dashboardSlice";
-import { Card } from "@/components/ui/card";
+import { AppDispatch, RootState } from "@/lib/store";
 
 export default function DashboardPage() {
   const dispatch = useDispatch<AppDispatch>();
   const { stats, loading, error } = useSelector((state: RootState) => state.dashboard);
-  console.log(stats);
+  console.log("stats", stats);
   useEffect(() => {
     dispatch(fetchDashboardStats());
   }, [dispatch]);
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (loading) return <div className="flex items-center justify-center min-h-[200px]"><LoadingSpinner size="lg" /></div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
