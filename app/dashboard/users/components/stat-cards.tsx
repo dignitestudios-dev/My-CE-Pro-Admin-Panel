@@ -91,7 +91,7 @@ export function StatCards({ activeUsers, deactivatedUsers, totalUsers }: { activ
 
             <div className="space-y-2">
               <p className="text-muted-foreground text-sm font-medium">
-             Activate Users
+             Active Users
               </p>
               <div className="text-2xl font-bold">{activeUsers}</div>
               {totalUsers && (
@@ -135,7 +135,7 @@ export function StatCards({ activeUsers, deactivatedUsers, totalUsers }: { activ
 
             <div className="space-y-2">
               <p className="text-muted-foreground text-sm font-medium">
-                Total Users
+                Deactive Users
               </p>
               <div className="text-2xl font-bold">{deactivatedUsers}</div>
               {totalUsers && (

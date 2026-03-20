@@ -13,15 +13,15 @@ export function PublicRoute({ children }: PublicRouteProps) {
   const router = useRouter();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     router.push('/dashboard');
-  //   }
-  // }, [isAuthenticated, router]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
-  // if (isAuthenticated) {
-  //   return null;
-  // }
+  if (isAuthenticated) {
+    return null;
+  }
 
   return <>{children}</>;
 }

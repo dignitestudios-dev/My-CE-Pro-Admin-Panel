@@ -58,7 +58,11 @@ export function DataTable({ notifications, pagination, loading }: DataTableProps
   const handleNextPage = () => {
     if (pagination.currentPage < pagination.totalPages) pagination.setCurrentPage(pagination.currentPage + 1);
   };
+const formatText = (text?: string) => {
+  if (!text) return "-";
 
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+};
   return (
     <div className="w-full space-y-4">
       <div className="rounded-md border">
@@ -66,8 +70,8 @@ export function DataTable({ notifications, pagination, loading }: DataTableProps
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Scheduled At</TableHead>
+              <TableHead className="w-[60%]">Description</TableHead>
+             
               <TableHead>Status</TableHead>
               <TableHead>Created At</TableHead>
           
@@ -83,19 +87,15 @@ export function DataTable({ notifications, pagination, loading }: DataTableProps
             ) : notifications
               .map((notification) => (
                 <TableRow key={notification._id}>
-                  <TableCell>{notification.title || "-"}</TableCell>
-                  <TableCell>{notification.description || "-"}</TableCell>
-                  <TableCell>
-                    {notification.scheduledAt
-                      ? new Date(notification.scheduledAt).toLocaleString()
-                      : "-"}
-                  </TableCell>
+                  <TableCell>{formatText(notification.title) || "-"}</TableCell>
+                  <TableCell className="w-[60%]">{formatText(notification.description) || "-"}</TableCell>
+                
                   <TableCell>
                     <Badge
                       className={
                         notification.status === "delivered"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
+                          ? " border-green-500 text-green-700 bg-white"
+                          : " border-yellow-500 text-yellow-700 bg-white"
                       }
                     >
                       {notification.status}

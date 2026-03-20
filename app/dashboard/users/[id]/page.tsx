@@ -109,15 +109,16 @@ export default function IdPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Back Button */}
+    <div className="min-h-screen p-3">
+      <h2 className="text-2xl font-bold text-gray-900 ">User Details</h2>
         <button
           onClick={() => window.history.back()}
-          className="mb-6 p-2 hover:bg-gray-200 rounded-full transition-colors inline-flex items-center gap-2"
+          className="mb-6 p-2 hover:bg-gray-200  rounded-full transition-colors inline-flex items-center gap-2"
         >
-          <span className="text-sm text-gray-700">Back to Users</span>
+          <span className="text-sm text-primary">Back to Users</span>
         </button>
+      <div className="max-w-6xl mx-auto">
+        {/* Back Button */}
 
         {/* Header Card */}
         <div className="bg-white shadow-md rounded-lg border border-gray-200 p-6 mb-4">
@@ -131,13 +132,21 @@ export default function IdPage() {
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                <h1 className="text-2xl flex flex-col font-bold text-gray-900 mb-1">
                   {user.fullName}
                   <span>{user.email}</span>
                 </h1>
                 <p className="text-sm text-blue-600 font-medium mb-2">
                   {user.profession}
                 </p>
+              
+              </div>
+            </div>
+
+            {/* Action Menu */}
+            <div className="relative  flex gap-3">
+              <div>
+
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
                     user.accountStatus
@@ -145,14 +154,10 @@ export default function IdPage() {
                 >
                   {user.accountStatus}
                 </span>
-              </div>
-            </div>
-
-            {/* Action Menu */}
-            <div className="relative">
+                </div>
               <button
                 onClick={() => setShowActionMenu(!showActionMenu)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm"
+                className="cursor-pointer px-4 py-1 bg-primary text-white rounded-lg font-medium transition-colors text-sm"
               >
                 Actions
               </button>
@@ -182,15 +187,15 @@ export default function IdPage() {
           <div className="grid grid-cols-4 gap-6">
             <div>
               <p className="text-xs text-gray-500 mb-1">Total Courses Added</p>
-              <p className="text-3xl font-bold text-gray-900">{user.totalCourses}</p>
+              <p className="text-3xl font-bold text-secondary">{user.totalCourses}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Courses Completed</p>
-              <p className="text-3xl font-bold text-green-600">{user.completedCourses}</p>
+              <p className="text-3xl font-bold text-primary">{user.completedCourses}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Total CE Hours</p>
-              <p className="text-3xl font-bold text-blue-600">{user.totalCEMinutes}</p>
+              <p className="text-3xl font-bold text-secondary">{user.totalCEMinutes}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Certificates Uploaded</p>
@@ -241,7 +246,7 @@ export default function IdPage() {
                 <div className="mt-3">
                   <div className="w-full bg-gray-200 rounded-full h-1.5">
                     <div
-                      className={`h-1.5 rounded-full ${isCompleted ? "bg-green-500" : "bg-blue-500"}`}
+                      className={`h-1.5 rounded-full ${isCompleted ? "bg-primary" : "bg-secondary"}`}
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>

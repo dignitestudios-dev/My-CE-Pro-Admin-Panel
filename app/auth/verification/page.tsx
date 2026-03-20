@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { verifyOTP } from "@/lib/slices/authSlice";
+import { forgotPassword, verifyOTP } from "@/lib/slices/authSlice";
 import { AppDispatch, RootState } from "@/lib/store";
+import { toast, Toaster } from "sonner";
+
 
 
 const Verification = () => {
@@ -15,7 +17,7 @@ const Verification = () => {
   const { email } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  console.log("email", email);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
@@ -68,6 +70,7 @@ const Verification = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    try {
     e.preventDefault();
     const otpCode = otp.join("");
 
@@ -78,16 +81,41 @@ const Verification = () => {
       await dispatch(verifyOTP({ otp: otpCode, email:email || "" })).unwrap();
       router.push("/auth/reset-password");
     }
+    } catch (error) {
+     toast.error(error as string);
+    }
+  };
+  const [timer, setTimer] = useState(30);
+ useEffect(() => {
+    if (timer === 0) return;
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+    const handleResend = async () => {
+    try {
+      await dispatch(forgotPassword({ email: email })).unwrap();
+
+      toast.success("OTP Resent");
+      setTimer(30); // reset timer
+    } catch (err) {
+      toast.error(err as string);
+    }
   };
 
   const isComplete = otp.every((digit) => digit !== "");
 
   return (
     <div className="w-full max-w-md">
+        <Toaster position="top-right" />
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
         <p className="text-gray-600">
-          We've sent a 6-digit code to your email address. Enter it below.
+          We've sent a 4-digit code to your email address. Enter it below.
         </p>
       </div>
 
@@ -119,6 +147,13 @@ const Verification = () => {
           <Link href="/auth/login" className="text-sm text-primary hover:underline">
             Back to Sign In
           </Link>
+          <button 
+            onClick={handleResend}
+            disabled={timer > 0}
+            className="text-sm text-red-400 hover:underline ml-2"
+          >
+            {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
+          </button>
         </div>
       </form>
     </div>

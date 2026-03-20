@@ -67,7 +67,7 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>Profession Name</TableHead>
-              <TableHead>CE Hours</TableHead>
+              <TableHead className="text-right">CE Hours</TableHead>
               
             </TableRow>
           </TableHeader>
@@ -84,7 +84,7 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
                 <TableRow key={profession._id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{profession.name || "-"}</TableCell>
-                  <TableCell>{profession.ceHours || "-"}</TableCell>
+                  <TableCell className="text-right">{profession.ceHours || "-"}</TableCell>
                   <TableCell>
                    
                   </TableCell>

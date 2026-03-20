@@ -1,6 +1,7 @@
 // lib/slices/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login as loginAPI, forgotPassword as forgotPasswordAPI, verifyOTP as verifyOTPAPI , updatePassword as updatePasswordAPI } from '../api/auth.api'; // tumhara API file
+import Cookies from 'js-cookie';
 
 // ------------------ Types ------------------
 export interface User {
@@ -20,7 +21,7 @@ interface AuthState {
 // ------------------ Initial State ------------------
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: true,
+  isAuthenticated: false,
   loading: false,
   error: null,
   email: null,
@@ -34,20 +35,30 @@ export const loginUser  = createAsyncThunk<User, { email: string; password: stri
   async (credentials, thunkAPI) => {
     try {
       const data = await loginAPI(credentials); // API call
-      return data.user; // API se user info return
+      console.log(data,"data-messages")
+      return data?.data?.admin; // API se user info return
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || 'Login failed');
     }
   }
 );
 
-export const forgotPassword = createAsyncThunk<void, { email: string }>(
+export const forgotPassword = createAsyncThunk<
+  any,
+  { email: string },
+  { rejectValue: string }
+>(
   'auth/forgotPassword',
   async (credentials, thunkAPI) => {
     try {
-      await forgotPasswordAPI(credentials.email);
+      const data = await forgotPasswordAPI(credentials.email);
+      return data;
     } catch (err: any) {
-      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Failed to send reset link');
+      console.log(err, "errooor-");
+
+      return thunkAPI.rejectWithValue(
+        err?.response?.data?.message || "Something went wrong"
+      );
     }
   }
 );
@@ -84,7 +95,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.loading = false;
             state.error = null;
-            localStorage.removeItem("authToken");
+            Cookies.remove("authToken");
     },
     setEmail: (state, action: PayloadAction<string>) => {
       state.email = action.payload;
@@ -96,13 +107,14 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(loginUser.fulfilled, (state, action: PayloadAction<User>) => {
+    builder.addCase(loginUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.isAuthenticated = true;
       state.user = action.payload;
+      state.isAuthenticated = true;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.loading = false;
+    
       state.error = action.payload as string;
     });
 
@@ -116,6 +128,7 @@ const authSlice = createSlice({
     });
     builder.addCase(forgotPassword.rejected, (state, action) => {
       state.loading = false;
+      
       state.error = action.payload as string;
     });
 
