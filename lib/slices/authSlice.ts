@@ -21,7 +21,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: true,
-  loading: false,
+  loading: true,
   error: null,
   email: null,
 };
@@ -34,7 +34,8 @@ export const loginUser  = createAsyncThunk<User, { email: string; password: stri
   async (credentials, thunkAPI) => {
     try {
       const data = await loginAPI(credentials); // API call
-      return data.user; // API se user info return
+      console.log(data,"data-messages")
+      return data?.data?.admin; // API se user info return
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || 'Login failed');
     }
@@ -84,7 +85,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.loading = false;
             state.error = null;
-            localStorage.removeItem("authToken");
+            cookieStore.delete("authToken");
     },
     setEmail: (state, action: PayloadAction<string>) => {
       state.email = action.payload;
@@ -96,13 +97,14 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(loginUser.fulfilled, (state, action: PayloadAction<User>) => {
+    builder.addCase(loginUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.isAuthenticated = true;
       state.user = action.payload;
+      state.isAuthenticated = true;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.loading = false;
+      state.isAuthenticated = false;
       state.error = action.payload as string;
     });
 

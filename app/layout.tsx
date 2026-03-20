@@ -6,6 +6,7 @@ import { SidebarConfigProvider } from "@/contexts/sidebar-context";
 import { Providers } from "@/components/providers";
 import { ProgressBar } from "@/components/progress-bar";
 import { ConnectionStatus } from "@/components/connection-status";
+import { SocketProvider } from "@/contexts/SocketContext";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -41,7 +42,9 @@ export default function RootLayout({
         <ProgressBar />
         <ConnectionStatus />
         <Providers>
+          <SocketProvider url="https://api.dev.myceproapp.com" >
           <SidebarConfigProvider>{children}</SidebarConfigProvider>
+          </SocketProvider>
         </Providers>
       </body>
     </html>

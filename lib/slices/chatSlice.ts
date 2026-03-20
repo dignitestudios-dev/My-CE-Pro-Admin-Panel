@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getChatRooms } from "../api/chat.api";
+import { getChatRoomMessages, getChatRooms } from "../api/chat.api";
 
 interface Pagination {
     itemsPerPage: number;
@@ -9,7 +9,8 @@ interface Pagination {
 }
 
 interface ChatState {
-    chatRooms: Notification[];
+    chatRooms: any[];
+    messages: any[];
     pagination: Pagination | null;
     loading: boolean;
     error: string | null;
@@ -17,12 +18,14 @@ interface ChatState {
 
 const initialState: ChatState = {
     chatRooms: [],
+    messages: [],
     pagination: null,
     loading: false,
     error: null,
 };
 
 interface ChatFetchParams {
+    roomId?: any;
     page?: number;
     limit?: number;
     search?: string;
@@ -37,12 +40,33 @@ export const fetchChatRooms = createAsyncThunk(
 
     }
 );
+export const getMessages = createAsyncThunk(
+    "chat/messages",
+    async ({ roomId, page = 1, limit = 10, search = "" }: ChatFetchParams) => {
+        const response = await getChatRoomMessages(roomId, page, limit, search);
+        console.log(response)
+        return response;
+
+    }
+);
 
 
 const chatSlice = createSlice({
     name: "chat",
     initialState,
-    reducers: {},
+    reducers: {
+
+        addMessage: (state, action) => {
+            if (!state.messages) {
+                state.messages = [action.payload];
+            } else {
+                state.messages = [...state.messages, action.payload];
+            }
+        },
+        setMessages: (state, action) => {
+            state.messages = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
 
@@ -62,9 +86,26 @@ const chatSlice = createSlice({
                 state.loading = false;
                 state.error =
                     action.error.message || "Failed to fetch chat rooms";
+            })
+            .addCase(getMessages.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+
+            .addCase(getMessages.fulfilled, (state, action) => {
+                // API response structure
+                state.loading = false;
+                state.messages = action.payload.data;
+                state.pagination = action.payload.pagination;
+            })
+
+            .addCase(getMessages.rejected, (state, action) => {
+                state.loading = false;
+                state.error =
+                    action.error.message || "Failed to fetch chat rooms";
             });
 
     },
 });
-
+export const { setMessages, addMessage } = chatSlice.actions;
 export default chatSlice.reducer;
