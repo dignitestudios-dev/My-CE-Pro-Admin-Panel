@@ -22,15 +22,9 @@ export default function UsersList({
 }: UsersListProps) {
   const [search, setSearch] = useState<string>("");
   const [filter, setFilter] = useState<"all" | Status>("all");
-  const dispatch = useDispatch<AppDispatch>();
-  const { chatRooms, pagination, loading } = useSelector(
-    (state: RootState) => state.chat,
-  );
 
-  useEffect(() => {
-    dispatch(fetchChatRooms({}));
-  }, [dispatch]);
 
+  
   const totalUnread = convos.reduce((acc, c) => acc + c.unread, 0);
 
   const filtered = convos.filter((c) => {
@@ -43,10 +37,12 @@ export default function UsersList({
     return matchSearch && matchFilter;
   });
 
+  console.log(filtered,"messages")
+
   return (
-    <div className="bg-white border-r border-gray-100 flex flex-col flex-shrink-0">
+    <div className="bg-white border-r border-gray-100 flex flex-col w-full">
       {/* Header */}
-      <div className="border-b pb-4 px-3 border-gray-100">
+      <div className="border-b pb-3 px-3 md:px-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-bold text-[#1a1a2e]">Support Inbox</h2>
 
@@ -72,7 +68,7 @@ export default function UsersList({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex gap-1.5 flex-wrap">
+        {/* <div className="flex gap-1.5 flex-wrap">
           {(["all", "open", "pending", "resolved"] as const).map((f) => (
             <button
               key={f}
@@ -87,21 +83,18 @@ export default function UsersList({
               {f}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
 
       {/* Conversation List */}
       <div className="flex-1 py-4  overflow-y-auto">
         {filtered.map((c) => {
-          const isActive = selected?.id === c.id;
-          const status = statusConfig[c.status];
-          const priority = priorityConfig[c.priority];
-
+          const isActive = selected?.id === c.id;      
           return (
             <div
               key={c.id}
               onClick={() => onSelect(c)}
-              className={`py-3 border-b px-3 border-gray-100 cursor-pointer transition-colors
+              className={`py-2.5 md:py-3 px-3 border-b border-gray-100 cursor-pointer transition-colors
                 ${isActive ? "bg-violet-50" : "hover:bg-violet-50/50"}`}
             >
               <div className="flex items-start gap-2.5">
@@ -128,11 +121,11 @@ export default function UsersList({
 
                   <div className="flex items-center gap-1.5">
                     {/* Unread */}
-                    {c.unread > 0 && (
+                    {/* {c.unread > 0 && (
                       <span className="ml-auto bg-[#b026ff] text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center">
                         {c.unread}
                       </span>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>

@@ -1,21 +1,56 @@
 "use client";
+
 import MainChat from "@/components/Chat/MainChat";
 import UsersList from "@/components/Chat/UsersList";
-import { conversations } from "@/constants/Data";
+import { AppDispatch, RootState } from "@/lib/store";
+import { fetchChatRooms } from "@/lib/slices/chatSlice";
 import type { Conversation, Message } from "@/constants/Data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function ChatSupport() {
-  const [convos, setConvos] = useState<Conversation[]>(conversations);
-  const [selected, setSelected] = useState<Conversation | null>(
-    conversations[0] || null,
+  const dispatch = useDispatch<AppDispatch>();
+  const { chatRooms, loading } = useSelector(
+    (state: RootState) => state.chat as any,
   );
 
-  const handleSelect = (convo: Conversation) => {
-    setConvos((prev) =>
-      prev.map((c) => (c.id === convo.id ? { ...c, unread: 0 } : c)),
-    );
+  const [convos, setConvos] = useState<Conversation[]>([]);
+  const [selected, setSelected] = useState<Conversation | null>(null);
 
+  // Fetch chat rooms on mount
+  useEffect(() => {
+    dispatch(fetchChatRooms({}));
+  }, [dispatch]);
+
+  // Map API chatRooms to Conversation whenever chatRooms change
+  useEffect(() => {
+    const mapped: Conversation[] = chatRooms.map((item: any) => {
+      const chatRoom = item.chatRoom;
+      const otherUser = item.chatUsers.find((u: any) => !u.isSelf);
+
+      return {
+        id: chatRoom.id,
+        user: {
+          name: otherUser?.user?.fullName || "Unknown",
+          avatar: otherUser?.user?.fullName?.charAt(0) || "U",
+          email: otherUser?.user?.email || "",
+        },
+        lastMessage: chatRoom.lastMessage || "No messages yet",
+        time: new Date(chatRoom.updatedAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        unread: otherUser?.unreadCount || 0,
+        status: "open", // optionally map from API status
+        priority: "medium", // optional
+        messages: [], // optional: later can populate with message API
+      };
+    });
+
+    setConvos(mapped);
+  }, [chatRooms]);
+
+  const handleSelect = (convo: Conversation) => {
     setSelected({ ...convo, unread: 0 });
   };
 
@@ -53,14 +88,30 @@ export default function ChatSupport() {
   const syncedSelected = convos.find((c) => c.id === selected?.id) ?? null;
 
   return (
-    <div className="flex bg-gray-50">
-      <UsersList
-        convos={convos}
-        selected={syncedSelected}
-        onSelect={handleSelect}
-      />
+    <div className="flex bg-gray-50 h-screen overflow-hidden">
+      {/* 🟣 Sidebar */}
+      <div
+        className={`
+      ${selected ? "hidden md:flex" : "flex"}
+      w-full md:w-[320px] lg:w-[350px]
+    `}
+      >
+        <UsersList
+          convos={convos}
+          selected={syncedSelected}
+          onSelect={handleSelect}
+        />
+      </div>
 
-      <MainChat selected={syncedSelected} onSend={handleSend} />
+      {/* 🟢 Chat */}
+      <div
+        className={`
+      ${!selected ? "hidden md:flex" : "flex"}
+      flex-1
+    `}
+      >
+        <MainChat selected={selected} onSend={handleSend} />
+      </div>
     </div>
   );
 }
