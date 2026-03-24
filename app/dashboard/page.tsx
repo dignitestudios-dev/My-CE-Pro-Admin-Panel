@@ -15,8 +15,8 @@ export default function DashboardPage() {
     dispatch(fetchDashboardStats());
   }, [dispatch]);
 
-  if (loading) return <div className="flex items-center justify-center min-h-[200px]"><LoadingSpinner size="lg" /></div>;
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  // if (loading) return <div className="flex items-center justify-center min-h-[200px]"><LoadingSpinner size="lg" /></div>;
+  // if (error) return <div className="p-4 text-red-500">{error} heloooooooooooooo </div>;
 
   return (
     <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

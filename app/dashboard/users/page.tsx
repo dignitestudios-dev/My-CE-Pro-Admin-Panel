@@ -10,25 +10,44 @@ import { StatCards } from "./components/stat-cards";
 export default function UsersPage() {
   const dispatch = useDispatch<AppDispatch>();
 
-  const { users, pagination, activeUsers, deactivatedUsers, totalUsers, loading, userCourses } =
-    useSelector((state: RootState) => state.users);
+  const {
+    users,
+    pagination,
+    activeUsers,
+    deactivatedUsers,
+    totalUsers,
+    loading,
+    userCourses,
+  } = useSelector((state: RootState) => state.users);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   // Filters
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // 👈 NEW
+
   const [accountStatus, setAccountStatus] = useState<"all" | "active" | "deactivated">("all");
   const [licenseExpired, setLicenseExpired] = useState<"all" | "true" | "false">("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // ✅ Debounce logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // ✅ API call
   useEffect(() => {
     dispatch(
       fetchUsers({
         page: currentPage,
         limit: pageSize,
-        search,
+        search: debouncedSearch, // 👈 use debounced value
         accountStatus: accountStatus === "all" ? undefined : accountStatus,
         licenseExpired: licenseExpired === "all" ? undefined : licenseExpired,
         startDate,
@@ -39,12 +58,17 @@ export default function UsersPage() {
     dispatch,
     currentPage,
     pageSize,
-    search,
+    debouncedSearch, // 👈 dependency change
     accountStatus,
     licenseExpired,
     startDate,
     endDate,
   ]);
+
+  // ✅ Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   const paginationData = {
     currentPage: pagination?.currentPage ?? currentPage,
@@ -63,35 +87,27 @@ export default function UsersPage() {
         <h1 className="text-2xl font-bold">Users</h1>
       </div>
 
-      <div className="flex items-center justify-between">
-        <StatCards
-          activeUsers={activeUsers}
-          deactivatedUsers={deactivatedUsers}
-          totalUsers={totalUsers}
-        />
-      </div>
+      <StatCards
+        activeUsers={activeUsers}
+        deactivatedUsers={deactivatedUsers}
+        totalUsers={totalUsers}
+      />
 
       <div className="@container/main px-4 lg:px-6 mt-8 lg:mt-12">
         <DataTable
           users={users}
           pagination={paginationData}
           loading={loading}
-
           search={search}
           setSearch={setSearch}
-
           accountStatus={accountStatus}
           setAccountStatus={setAccountStatus}
-
           licenseExpired={licenseExpired}
           setLicenseExpired={setLicenseExpired}
-
           startDate={startDate}
           setStartDate={setStartDate}
-
           endDate={endDate}
           setEndDate={setEndDate}
-
           userCourses={userCourses}
         />
       </div>

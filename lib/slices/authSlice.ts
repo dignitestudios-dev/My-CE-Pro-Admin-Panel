@@ -21,7 +21,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: true,
-  loading: false,
+  loading: true,
   error: null,
   email: null,
 };
@@ -85,7 +85,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.loading = false;
             state.error = null;
-            localStorage.removeItem("authToken");
+            cookieStore.delete("authToken");
     },
     setEmail: (state, action: PayloadAction<string>) => {
       state.email = action.payload;
@@ -99,11 +99,12 @@ const authSlice = createSlice({
     });
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.loading = false;
-      state.isAuthenticated = true;
       state.user = action.payload;
+      state.isAuthenticated = true;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.loading = false;
+      state.isAuthenticated = false;
       state.error = action.payload as string;
     });
 

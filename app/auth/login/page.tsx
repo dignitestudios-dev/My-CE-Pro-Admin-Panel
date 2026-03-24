@@ -40,7 +40,7 @@ const Login = () => {
      
 
         // Login success → navigate
-        router.push("/dashboard");
+      
       } catch (err: any) {
         // API error
         resetForm();
