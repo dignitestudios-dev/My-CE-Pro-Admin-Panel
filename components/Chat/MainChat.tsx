@@ -103,7 +103,8 @@ export default function MainChat({ selected, onSend }: MainChatProps) {
     // ✅ No more TS error — callback is typed as optional second argument
     sendMessage(messagePayload, (ack: AckResponse) => {
       if (ack?.success) {
-        console.log("Message delivered ✅");
+         dispatch(addMessage(ack?.data?.message));
+        console.log("Message delivered ✅",ack);
       } else {
         console.error("Message failed ❌", ack?.message);
       }
