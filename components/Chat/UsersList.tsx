@@ -1,6 +1,6 @@
 import { forwardRef, useState } from "react";
 import { Conversation, Status } from "@/constants/Data";
-import { Search } from "lucide-react";
+import { LoaderPinwheel, Search } from "lucide-react";
 
 type UsersListProps = {
   convos: Conversation[];
@@ -91,11 +91,14 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
           })}
 
           {/* Bottom Loader */}
-          {isFetchingMore && (
-            <div className="text-center py-3 text-gray-400 text-sm">
-              Loading more...
-            </div>
-          )}
+        {isFetchingMore && (
+  <div className="text-center py-10">
+    <LoaderPinwheel className="mx-auto animate-spin text-violet-500" />
+    <p className="text-gray-400 text-[15px] mt-2">
+      Fetching more conversations…
+    </p>
+  </div>
+)}
         </div>
       </div>
     );
