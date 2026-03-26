@@ -7,7 +7,7 @@ import SocketContext, {
 import { addMessage, getMessages } from "@/lib/slices/chatSlice";
 import { AppDispatch, RootState } from "@/lib/store";
 import { MessageCircleMore } from "lucide-react";
-import { useState, useRef, useEffect, KeyboardEvent, useContext } from "react";
+import { useState, useRef, useEffect, KeyboardEvent, useContext ,useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 type MainChatProps = {
@@ -24,12 +24,25 @@ export default function MainChat({ selected, onSend }: MainChatProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { messages } = useSelector((state: RootState) => state.chat as any);
   const { user } = useSelector((state: RootState) => state.auth as any);
-
+  const [isLoading,setIsLoading]=useState(false);
   // Fetch messages whenever selected chat changes
+const fetchMsg = useCallback(async () => {
+  if (!selected) return;
+
+  const alreadyLoaded = messages.some(
+    (m: any) => m.chatRoom === selected.id
+  );
+
+  if (alreadyLoaded) return;
+
+  setIsLoading(true);
+  await dispatch(getMessages({ roomId: selected.id }));
+  setIsLoading(false);
+}, [selected, dispatch, messages]);
+
   useEffect(() => {
-    if (!selected) return;
-    dispatch(getMessages({ roomId: selected.id }));
-  }, [dispatch, selected]);
+  fetchMsg();
+}, [selected]);
 
   // Sync Redux messages to local state
   useEffect(() => {
@@ -60,7 +73,6 @@ export default function MainChat({ selected, onSend }: MainChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  console.log(socket, "socket,->");
   useEffect(() => {
     if (!socket) return;
 
@@ -172,45 +184,60 @@ export default function MainChat({ selected, onSend }: MainChatProps) {
             </span>
           </div>
 
-          {chatMessages.map((msg) => {
-            const isAdmin = msg.from === "admin";
+         {isLoading ? (
+  <div className="flex flex-col gap-3 mt-4">
+    {[1, 2, 3, 4].map((i) => (
+      <div key={i} className="flex items-end gap-2">
+        <div className="w-7 h-7 rounded-full bg-gray-300 animate-pulse"></div>
 
-            return (
-              <div
-                key={msg.id}
-                className={`flex items-end gap-2 ${
-                  isAdmin ? "flex-row-reverse" : "flex-row"
-                }`}
-                style={{ animation: "slideIn 0.2s ease" }}
-              >
-                {!isAdmin && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#d580ff] to-[#b026ff] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                    {selected.user.avatar}
-                  </div>
-                )}
+        <div className="max-w-[85%] md:max-w-[65%]">
+          <div className="h-10 w-40 bg-gray-300 rounded-2xl rounded-bl-sm animate-pulse"></div>
+          <div className="h-2 w-16 bg-gray-200 rounded mt-2 animate-pulse"></div>
+        </div>
+      </div>
+    ))}
+  </div>
+) : (
+  chatMessages.map((msg) => {
+    console.log(msg,"messages")
+    const isAdmin = msg.from === "admin";
+    return (
+      <div
+        key={msg.id}
+        className={`flex items-end gap-2 ${
+          isAdmin ? "flex-row-reverse" : "flex-row"
+        }`}
+        style={{ animation: "slideIn 0.2s ease" }}
+      >
+        {!isAdmin && (
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#d580ff] to-[#b026ff] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+            {selected.user.avatar}
+          </div>
+        )}
 
-                <div className="max-w-[85%] md:max-w-[65%]">
-                  <div
-                    className={`px-3.5 py-2.5 text-[13px] leading-relaxed ${
-                      isAdmin
-                        ? "bg-gradient-to-br from-[#b026ff] to-[#7c00cc] text-white rounded-2xl rounded-br-sm shadow-[0_2px_12px_rgba(176,38,255,0.25)]"
-                        : "bg-white text-[#1a1a2e] rounded-2xl rounded-bl-sm shadow-sm"
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
+        <div className="max-w-[85%] md:max-w-[65%]">
+          <div
+            className={`px-3.5 py-2.5 text-[13px] leading-relaxed ${
+              isAdmin
+                ? "bg-gradient-to-br from-[#b026ff] to-[#7c00cc] text-white rounded-2xl rounded-br-sm shadow-[0_2px_12px_rgba(176,38,255,0.25)]"
+                : "bg-white text-[#1a1a2e] rounded-2xl rounded-bl-sm shadow-sm"
+            }`}
+          >
+            {msg.text}
+          </div>
 
-                  <p
-                    className={`text-[10px] text-gray-400 mt-1 ${
-                      isAdmin ? "text-right" : "text-left"
-                    }`}
-                  >
-                    {msg.time} {isAdmin && "· You"}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          <p
+            className={`text-[10px] text-gray-400 mt-1 ${
+              isAdmin ? "text-right" : "text-left"
+            }`}
+          >
+            {msg.time} {isAdmin && "· You"}
+          </p>
+        </div>
+      </div>
+    );
+  })
+)}
 
           <div ref={messagesEndRef} />
         </div>

@@ -42,7 +42,7 @@ export default function RootLayout({
         <ProgressBar />
         <ConnectionStatus />
         <Providers>
-          <SocketProvider url="https://api.dev.myceproapp.com" >
+          <SocketProvider url="https://api.staging.myceproapp.com" >
           <SidebarConfigProvider>{children}</SidebarConfigProvider>
           </SocketProvider>
         </Providers>
