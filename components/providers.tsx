@@ -6,6 +6,7 @@ import { PersistGate } from "redux-persist/integration/react";
 
 const Loader = () => (
   <div className="flex items-center justify-center h-screen">
+    test
     <div className="w-8 h-8 border-4 border-gray-300 border-t-purple-600 rounded-full animate-spin" />
   </div>
 );

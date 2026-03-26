@@ -6,6 +6,7 @@ import SocketContext, {
 } from "@/contexts/SocketContext";
 import { addMessage, getMessages } from "@/lib/slices/chatSlice";
 import { AppDispatch, RootState } from "@/lib/store";
+import { MessageCircleMore } from "lucide-react";
 import { useState, useRef, useEffect, KeyboardEvent, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -124,7 +125,7 @@ export default function MainChat({ selected, onSend }: MainChatProps) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="text-4xl mb-3">💬</div>
+          <div className="text-4xl mb-3"><MessageCircleMore size={25} className="mx-auto text-gray-500 " /></div>
           <p className="text-gray-400 text-sm font-medium">
             Select a conversation to begin
           </p>

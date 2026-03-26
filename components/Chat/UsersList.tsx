@@ -6,6 +6,7 @@ import {
 } from "@/constants/Data";
 import { fetchChatRooms } from "@/lib/slices/chatSlice";
 import { AppDispatch, RootState } from "@/lib/store";
+import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -56,7 +57,7 @@ export default function UsersList({
         {/* Search */}
         <div className="relative mb-3">
           <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-400">
-            🔍
+            <Search size={18}   />
           </span>
 
           <input
@@ -87,52 +88,49 @@ export default function UsersList({
       </div>
 
       {/* Conversation List */}
-      <div className="flex-1 py-4  overflow-y-auto">
-        {filtered.map((c) => {
-          const isActive = selected?.id === c.id;      
-          return (
-            <div
-              key={c.id}
-              onClick={() => onSelect(c)}
-              className={`py-2.5 md:py-3 px-3 border-b border-gray-100 cursor-pointer transition-colors
-                ${isActive ? "bg-violet-50" : "hover:bg-violet-50/50"}`}
-            >
-              <div className="flex items-start gap-2.5">
-                {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#d580ff] to-[#b026ff] flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0 shadow-sm">
-                  {c.user.avatar}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[13px] font-semibold text-[#1a1a2e] truncate">
-                      {c.user.name}
-                    </span>
-
-                    <span className="text-[11px] text-gray-400 flex-shrink-0 ml-1">
-                      {c.time}
-                    </span>
-                  </div>
-
-                  <p className="text-[12px] text-gray-400 truncate mb-1.5">
-                    {c.lastMessage}
-                  </p>
-
-                  <div className="flex items-center gap-1.5">
-                    {/* Unread */}
-                    {/* {c.unread > 0 && (
-                      <span className="ml-auto bg-[#b026ff] text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center">
-                        {c.unread}
-                      </span>
-                    )} */}
-                  </div>
-                </div>
-              </div>
+<div className="flex-1 py-4 overflow-y-auto">
+  {filtered.length === 0 ? (
+    <div className="flex items-center justify-center h-full text-sm text-gray-400">
+      No users found
+    </div>
+  ) : (
+    filtered.map((c) => {
+      const isActive = selected?.id === c.id;
+      return (
+        <div
+          key={c.id}
+          onClick={() => onSelect(c)}
+          className={`py-2.5 md:py-3 px-3 border-b border-gray-100 cursor-pointer transition-colors
+            ${isActive ? "bg-violet-50" : "hover:bg-violet-50/50"}`}
+        >
+          <div className="flex items-start gap-2.5">
+            {/* Avatar */}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#d580ff] to-[#b026ff] flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0 shadow-sm">
+              {c.user.avatar}
             </div>
-          );
-        })}
-      </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[13px] font-semibold text-[#1a1a2e] truncate">
+                  {c.user.name}
+                </span>
+
+                <span className="text-[11px] text-gray-400 flex-shrink-0 ml-1">
+                  {c.time}
+                </span>
+              </div>
+
+              <p className="text-[12px] text-gray-400 truncate mb-1.5">
+                {c.lastMessage}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    })
+  )}
+</div>
     </div>
   );
 }

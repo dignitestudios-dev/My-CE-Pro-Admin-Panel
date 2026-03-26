@@ -9,7 +9,7 @@ export default function Page() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push("/dashboard");
+      // router.push("/dashboard");
     }, 2000); // Redirect after 2 seconds
 
     return () => clearTimeout(timer);
