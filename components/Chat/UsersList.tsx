@@ -58,11 +58,11 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
 
         {/* Conversation List */}
         <div ref={ref} className="flex-1 py-4 overflow-y-auto">
-          {filtered.map((c) => {
+          {filtered.map((c,i) => {
             const isActive = selected?.id === c.id;
             return (
               <div
-                key={c.id}
+                key={i}
                 onClick={() => onSelect(c)}
                 className={`py-3 px-3 border-b cursor-pointer ${
                   isActive ? "bg-violet-50" : "hover:bg-violet-50/50"

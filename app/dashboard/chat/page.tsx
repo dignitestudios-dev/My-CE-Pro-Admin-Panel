@@ -52,18 +52,18 @@ export default function ChatSupport() {
           const otherUser = item.chatUsers.find((u: any) => !u.isSelf);
 
           return {
-            id: chatRoom.id,
+            id: String(chatRoom._id || chatRoom.id),
             user: {
-              name: otherUser?.user?.fullName || "Unknown",
-              avatar: otherUser?.user?.fullName?.charAt(0) || "U",
-              email: otherUser?.user?.email || "",
+              name: String(otherUser?.user?.fullName || "Unknown"),
+              avatar: String(otherUser?.user?.fullName?.charAt(0) || "U"),
+              email: String(otherUser?.user?.email || ""),
             },
-            lastMessage: chatRoom.lastMessage || "No messages yet",
+            lastMessage: String(chatRoom.lastMessage?.content || "No messages yet"),
             time: new Date(chatRoom.updatedAt).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             }),
-            unread: otherUser?.unreadCount || 0,
+            unread: Number(otherUser?.unreadCount || 0),
             status: "open",
             priority: "medium",
             messages: [],
