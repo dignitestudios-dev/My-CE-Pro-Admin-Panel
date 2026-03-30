@@ -58,7 +58,11 @@ export default function ChatSupport() {
               avatar: String(otherUser?.user?.fullName?.charAt(0) || "U"),
               email: String(otherUser?.user?.email || ""),
             },
-            lastMessage: String(chatRoom.lastMessage?.content || "No messages yet"),
+            lastMessage: chatRoom.lastMessage?.content
+              ? chatRoom.lastMessage.content
+              : chatRoom.lastMessage?.type === "media"
+                ? "Media"
+                : "No messages yet",
             time: new Date(chatRoom.updatedAt).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
