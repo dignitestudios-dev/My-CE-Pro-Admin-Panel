@@ -35,7 +35,7 @@ export default function ChatSupport() {
           avatar: otherUser?.user?.fullName?.charAt(0) || "U",
           email: otherUser?.user?.email || "",
         },
-        lastMessage: chatRoom.lastMessage || "No messages yet",
+        lastMessage: chatRoom.lastMessage?.content ? chatRoom.lastMessage?.content : "No messages yet",
         time: new Date(chatRoom.updatedAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",

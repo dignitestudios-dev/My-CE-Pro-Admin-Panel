@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { checkAuthStatus } from '@/lib/slices/authSlice';
+
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,13 +14,17 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
+  const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
+    } else {
+      // Check token validity when component mounts
+      dispatch(checkAuthStatus() as any);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, dispatch]);
 
   if (!isAuthenticated) {
     return (

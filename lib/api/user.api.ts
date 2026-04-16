@@ -9,6 +9,7 @@ interface GetUsersParams {
   licenseExpired?: "all" | "true" | "false";
   startDate?: string;
   endDate?: string;
+  
 }
 
 export const getUsers = async (params: GetUsersParams = {}) => {

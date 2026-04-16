@@ -20,7 +20,7 @@ export const login = async (credentials: any) => {
 export const register = async (credentials: any) => {
   const response = await API.post('/auth/register', credentials);
   if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token);
+    Cookies.set('authToken', response.data.token);
   }
   return response.data;
 };
@@ -33,7 +33,7 @@ export const logout = async () => {
     console.error('Logout error:', error);
   } finally {
     // Always remove token locally
-    localStorage.removeItem('authToken');
+    Cookies.remove('authToken');
   }
 };
 
@@ -83,7 +83,7 @@ export const getProfile = async () => {
 export const refreshToken = async () => {
   const response = await API.post('/auth/refresh');
   if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token);
+    Cookies.set('authToken', response.data.token);
   }
   return response.data;
 };

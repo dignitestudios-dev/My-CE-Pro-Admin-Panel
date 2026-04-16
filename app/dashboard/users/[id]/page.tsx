@@ -14,10 +14,11 @@ import CourseDetailModal, { Course } from "../components/course-detail-modal";
 
 export default function IdPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { userDetail, loading, userCourses } = useSelector((state: RootState) => state.users);
+  const { userDetail, loading, userCourses } = useSelector(
+    (state: RootState) => state.users
+  );
 
-  const params = useParams();
-  const { id } = params;
+  const { id } = useParams();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -29,17 +30,17 @@ export default function IdPage() {
     }
   }, [id, dispatch]);
 
- const handleCourseClick = (courseId: string) => {
+  useEffect(() => {
+    if (userCourses && isModalOpen) {
+      setSelectedCourse(userCourses);
+    }
+  }, [userCourses, isModalOpen]);
+
+  const handleCourseClick = (courseId: string) => {
     if (id && typeof id === "string") {
       dispatch(fetchUserCourses(courseId));
-     setSelectedCourse(userCourses)
       setIsModalOpen(true);
     }
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedCourse(null);
   };
 
   const handleDeactivate = () => {
@@ -54,134 +55,148 @@ export default function IdPage() {
     setShowActionMenu(false);
   };
 
-  const getStatusColor = (status: string) => {
+  // ✅ Account Status UI
+  const getAccountStatusColor = (status: string) => {
     switch (status) {
       case "Active":
         return "bg-green-100 text-green-700";
       case "Inactive":
         return "bg-gray-100 text-gray-700";
-      case "Suspended":
-        return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
 
-  // ✅ Map API data to UI
+  // ✅ Course Status UI (FIXED)
+  const getCourseStatus = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+        return {
+          text: "Completed",
+          className: "bg-green-100 text-green-700",
+        };
+      case "inprogress":
+      case "in progress":
+        return {
+          text: "In Progress",
+          className: "bg-blue-100 text-blue-700",
+        };
+      case "pending":
+        return {
+          text: "Pending",
+          className: "bg-yellow-100 text-yellow-700",
+        };
+      default:
+        return {
+          text: "Pending",
+          className: "bg-gray-100 text-gray-700",
+        };
+    }
+  };
+
   const user = {
-    id: userDetail?._id || "",
+    profile : userDetail?.profilePicture ||"https://ui-avatars.com/api/?name",
     fullName: userDetail?.fullName || "Unknown",
     email: userDetail?.emailAddress || "",
     profession: userDetail?.profession || "-",
-    licenseNumber: userDetail?.licenseNumber?.toString() || "-",
-    licenseExpiry: userDetail?.licenseExpiry || "",
     accountStatus: userDetail?.accountStatus ? "Active" : "Inactive",
-    lastActivity: userDetail?.lastActivity || "",
     totalCourses: userDetail?.totalCourses ?? 0,
     completedCourses: userDetail?.completedCourses ?? 0,
     totalCEMinutes: userDetail?.totalCEMinutes ?? 0,
+    licenseNumber: userDetail?.licenseNumber ,
+    licenseExpiry: userDetail?.licenseExpiry ,
     certificateUploadCount: userDetail?.certificateUploadCount ?? 0,
-    avatarUrl: `https://ui-avatars.com/api/?name=${userDetail?.fullName || "User"}`,
+    avatarUrl: `https://ui-avatars.com/api/?name=${
+      userDetail?.fullName || "User"
+    }`,
     courses:
       userDetail?.courses?.map((course: any) => ({
         _id: course._id,
         name: course.name,
-        institute: course.institute || course.institution || "-",
-        startDate: course.startDate || null,
-        endDate: course.endDate || null,
-        certificate: course.certificate || null,
+        institute: course.institute || "-",
         minsRequired: course.minsRequired,
         completedMinutes: course.completedMinutes,
-        status: (
-          course.status?.toLowerCase() === "completed"
-            ? "completed"
-            : course.status?.toLowerCase() === "inprogress"
-            ? "inProgress"
-            : course.status?.toLowerCase() === "active"
-            ? "active"
-            : "pending"
-        ) as "pending" | "active" | "completed" | "inProgress",
-        completionPercentage: Math.min(
-          (course.completedMinutes / course.minsRequired) * 100,
-          100
-        ),
+        status: course.status,
       })) || [],
   };
 
   return (
-    <div className="min-h-screen p-3">
-      <h2 className="text-2xl font-bold text-gray-900 ">User Details</h2>
-        <button
-          onClick={() => window.history.back()}
-          className="mb-6 p-2 hover:bg-gray-200  rounded-full transition-colors inline-flex items-center gap-2"
-        >
-          <span className="text-sm text-primary">Back to Users</span>
-        </button>
+    <div className="min-h-screen p-4">
+      <h2 className="text-2xl font-bold mb-2">User Details</h2>
+
+      <button
+        onClick={() => window.history.back()}
+        className="mb-6 text-primary text-sm"
+      >
+        ← Back to Users
+      </button>
+
       <div className="max-w-6xl mx-auto">
-        {/* Back Button */}
 
-        {/* Header Card */}
-        <div className="bg-white shadow-md rounded-lg border border-gray-200 p-6 mb-4">
-          <div className="flex items-start justify-between">
-            <div className="flex gap-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                <img
-                  src={user.avatarUrl}
-                  alt={user.fullName}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl flex flex-col font-bold text-gray-900 mb-1">
-                  {user.fullName}
-                  <span>{user.email}</span>
-                </h1>
-                <p className="text-sm text-blue-600 font-medium mb-2">
-                  {user.profession}
-                </p>
-              
-              </div>
-            </div>
+        {/* Profile */}
+        <div className="bg-white shadow rounded-lg p-6 mb-4 flex justify-between ">
+          <div className=" flex items-center  ">
+          <div className="flex gap-4">
+            <img
+              src={user.profile || user.avatarUrl }
+              className="w-16 h-16 rounded-full"
+            />
 
-            {/* Action Menu */}
-            <div className="relative  flex gap-3">
-              <div>
-
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                    user.accountStatus
-                  )}`}
-                >
-                  {user.accountStatus}
-                </span>
-                </div>
-              <button
-                onClick={() => setShowActionMenu(!showActionMenu)}
-                className="cursor-pointer px-4 py-1 bg-primary text-white rounded-lg font-medium transition-colors text-sm"
-              >
-                Actions
-              </button>
-              {showActionMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
-                  <button
-                    onClick={handleActivate}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm text-gray-700"
-                  >
-                    Activate Account
-                  </button>
-                  <button
-                    onClick={handleDeactivate}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm text-gray-700"
-                  >
-                    Deactivate Account
-                  </button>
-                </div>
-              )}
+            <div>
+              <h1 className="text-xl font-bold">{user.fullName}</h1>
+              <p className="text-gray-500 text-sm">{user.email}</p>
+              <p className="text-blue-600 text-sm">{user.profession}</p>
             </div>
           </div>
-        </div>
+          
+</div>
+          <div className="relative flex gap-3 items-start">
+            <span
+              className={`px-3 py-1 rounded-full text-xs ${getAccountStatusColor(
+                user.accountStatus
+              )}`}
+            >
+              {user.accountStatus}
+            </span>
 
-        {/* Study Summary */}
+            <button
+              onClick={() => setShowActionMenu(!showActionMenu)}
+              className="bg-primary text-white px-4 py-1 rounded text-sm"
+            >
+              Actions
+            </button>
+
+            {showActionMenu && (
+              <div className="absolute right-0 top-10 bg-white border shadow rounded w-40">
+                <button
+                  onClick={handleActivate}
+                  className="block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+                >
+                  Activate
+                </button>
+                <button
+                  onClick={handleDeactivate}
+                  className="block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+                >
+                  Deactivate
+                </button>
+              </div>
+            )}
+          </div>
+          
+        </div>
+        <div className="grid grid-cols-2 gap-3 shadow mt-4 pt-4 border-t border-gray-100 bg-white rounded-lg p-6 mb-4">
+  <div>
+    <p className="text-xs text-gray-400 uppercase tracking-wide">License number</p>
+    <p className="text-sm mt-1">{user.licenseNumber || 'N/A'}</p>
+  </div>
+  <div>
+    <p className="text-xs text-gray-400 uppercase tracking-wide">License expiry</p>
+    <p className="text-sm mt-1">{user.licenseExpiry ? new Date(user.licenseExpiry).toLocaleDateString() : 'N/A'}</p>
+  </div>
+</div>
+
+        {/* Stats */}
         <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-4">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">Study Summary</h2>
           <div className="grid grid-cols-4 gap-6">
@@ -194,7 +209,7 @@ export default function IdPage() {
               <p className="text-3xl font-bold text-primary">{user.completedCourses}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-1">Total CE Hours</p>
+              <p className="text-xs text-gray-500 mb-1">Total CE Minutes</p>
               <p className="text-3xl font-bold text-secondary">{user.totalCEMinutes}</p>
             </div>
             <div>
@@ -204,66 +219,75 @@ export default function IdPage() {
           </div>
         </div>
 
-        {/* Course Summary */}
-        <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-4">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Course Summary</h2>
-          {user.courses.map((course) => {
-            const progressPercent = Math.min(
-              (course.completedMinutes / course.minsRequired) * 100,
-              100
-            );
-            const isCompleted = course.status === "completed";
-            return (
-              <div
-                key={course._id}
-                onClick={() => handleCourseClick(course._id)}
-                className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 cursor-pointer hover:bg-gray-50 rounded-lg px-2 transition-colors"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{course.name}</h3>
-                    <p className="text-sm text-gray-500">{course.institute}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Status</p>
-                    <span
-                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                        isCompleted ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-                      }`}
-                    >
-                      {isCompleted ? "Completed" : "In Progress"}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Minutes Progress</p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {course.completedMinutes} / {course.minsRequired} mins
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div
-                      className={`h-1.5 rounded-full ${isCompleted ? "bg-primary" : "bg-secondary"}`}
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        {/* Courses */}
+       <div className="bg-white shadow rounded-lg p-6">
+  <h2 className="text-lg font-semibold mb-4">Course Summary</h2>
+
+  {user?.courses?.length ? (
+    user.courses.map((course) => {
+      const percent = Math.min(
+        (course.completedMinutes / course.minsRequired) * 100,
+        100
+      );
+
+      const statusObj = getCourseStatus(course.status);
+
+      return (
+        <div
+          key={course._id}
+          onClick={() => handleCourseClick(course._id)}
+          className="border-b pb-4 mb-4 last:border-0 cursor-pointer hover:bg-gray-50 rounded px-2"
+        >
+          <div className="flex justify-between">
+            <div>
+              <h3 className="font-semibold">{course.name || "-"}</h3>
+              <p className="text-sm text-gray-500">
+                {course.institute || "-"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 mt-3">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Status</p>
+              <span className={`px-2 py-1 rounded text-xs ${statusObj.className}`}>
+                {statusObj.text}
+              </span>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Minutes Progress</p>
+              <p className="text-sm font-semibold">
+                {course.completedMinutes || 0} / {course.minsRequired || 0}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 w-full bg-gray-200 h-2 rounded">
+            <div
+              className="bg-blue-500 h-2 rounded"
+              style={{ width: `${percent || 0}%` }}
+            />
+          </div>
         </div>
+      );
+    })
+  ) : (
+    <div className="text-center text-gray-500 py-5">
+      Data not found
+    </div>
+  )}
+</div>
       </div>
 
-      {/* Course Detail Modal */}
       <CourseDetailModal
         isOpen={isModalOpen}
-        onClose={handleModalClose}
+        onClose={() => setIsModalOpen(false)}
         data={selectedCourse}
         loading={loading}
       />
     </div>
   );
 }
+
+// ✅ Reusable Stat

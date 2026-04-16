@@ -81,12 +81,20 @@ export default function UsersPage() {
     },
   };
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Users</h1>
-      </div>
+  // Map ApiUser to User interface for DataTable compatibility
+  const mappedUsers = users.map((user) => ({
+    _id: user._id,
+    fullName: user.fullName,
+    emailAddress: user.emailAddress,
+    profession: user.profession,
+    licenseNumber: user.licenseNumber,
+    licenseExpiry: user.licenseExpiry,
+    accountStatus: user.accountStatus,
+    profilePicture: user.profilePicture || null, // Convert undefined to null
+  }));
 
+  return (
+    <div className="space-y-6">
       <StatCards
         activeUsers={activeUsers}
         deactivatedUsers={deactivatedUsers}
@@ -95,7 +103,7 @@ export default function UsersPage() {
 
       <div className="@container/main px-4 lg:px-6 mt-8 lg:mt-12">
         <DataTable
-          users={users}
+          users={mappedUsers}
           pagination={paginationData}
           loading={loading}
           search={search}

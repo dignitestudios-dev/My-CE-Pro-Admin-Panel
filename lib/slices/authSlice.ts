@@ -18,10 +18,37 @@ interface AuthState {
   email: string | null;
 }
 
+// ------------------ Helper Functions ------------------
+// Check if token exists and is valid
+export const validateToken = (): boolean => {
+  const token = Cookies.get('authToken');
+  if (!token) {
+    return false;
+  }
+  
+  try {
+    // Basic JWT token validation (check if it's not expired)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Date.now() / 1000;
+    
+    if (payload.exp && payload.exp < currentTime) {
+      // Token expired, remove it
+      Cookies.remove('authToken');
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    // Invalid token format, remove it
+    Cookies.remove('authToken');
+    return false;
+  }
+};
+
 // ------------------ Initial State ------------------
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: false,
+  isAuthenticated: validateToken(),
   loading: false,
   error: null,
   email: null,
@@ -85,6 +112,18 @@ export const updatePassword = createAsyncThunk<void, { password: string }>(
   }
 );
 
+// Token validation thunk
+export const checkAuthStatus = createAsyncThunk(
+  'auth/checkStatus',
+  async (_, thunkAPI) => {
+    const isValid = validateToken();
+    if (!isValid) {
+      return thunkAPI.rejectWithValue('Token expired or invalid');
+    }
+    return true;
+  }
+);
+
 // ------------------ Slice ------------------
 const authSlice = createSlice({
   name: "auth",
@@ -114,7 +153,7 @@ const authSlice = createSlice({
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.loading = false;
-    
+     state.isAuthenticated = false;
       state.error = action.payload as string;
     });
 
@@ -145,6 +184,24 @@ builder.addCase (updatePassword.fulfilled, (state) => {
 builder.addCase (updatePassword.rejected, (state, action) => {
   state.loading = false;
   state.error = action.payload as string;
+});
+
+// Check auth status
+builder.addCase(checkAuthStatus.pending, (state) => {
+  state.loading = true;
+});
+
+builder.addCase(checkAuthStatus.fulfilled, (state) => {
+  state.loading = false;
+  // Token is valid, keep current state
+});
+
+builder.addCase(checkAuthStatus.rejected, (state, action) => {
+  state.loading = false;
+  state.user = null;
+  state.isAuthenticated = false;
+  state.error = action.payload as string;
+  Cookies.remove('authToken');
 });
 
   },

@@ -110,7 +110,7 @@ export default function CourseDetailModal({
 
                 <Badge
                   variant={statusVariantMap[course.status] ?? "secondary"}
-                  className="mt-1 shrink-0 capitalize"
+                  className="mt-4 shrink-0 capitalize"
                 >
                   {course.status}
                 </Badge>

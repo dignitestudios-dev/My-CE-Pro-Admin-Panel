@@ -97,8 +97,13 @@ const Verification = () => {
   }, [timer]);
 
     const handleResend = async () => {
+    if (!email) {
+      toast.error("Email address is missing.");
+      return;
+    }
+
     try {
-      await dispatch(forgotPassword({ email: email })).unwrap();
+      await dispatch(forgotPassword({ email })).unwrap();
 
       toast.success("OTP Resent");
       setTimer(30); // reset timer

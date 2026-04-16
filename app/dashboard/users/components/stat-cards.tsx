@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export function StatCards({ activeUsers, deactivatedUsers, totalUsers }: { activeUsers: number; deactivatedUsers: number; totalUsers: number }) {
-  
+ 
   return (
     <div className="w-full grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     
@@ -135,7 +135,7 @@ export function StatCards({ activeUsers, deactivatedUsers, totalUsers }: { activ
 
             <div className="space-y-2">
               <p className="text-muted-foreground text-sm font-medium">
-                Deactive Users
+                Inactive Users
               </p>
               <div className="text-2xl font-bold">{deactivatedUsers}</div>
               {totalUsers && (

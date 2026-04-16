@@ -2,12 +2,14 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { RootState } from "@/lib/store";
+import { checkAuthStatus } from "@/lib/slices/authSlice";
 
 export default function Page() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
@@ -22,6 +24,11 @@ export default function Page() {
       router.push("/auth/login");
     }
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    // Check token validity on initial load
+    dispatch(checkAuthStatus() as any);
+  }, [dispatch]);
 
   if (!isAuthenticated) {
     return (

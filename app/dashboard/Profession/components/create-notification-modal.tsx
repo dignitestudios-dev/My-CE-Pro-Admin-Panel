@@ -77,10 +77,17 @@ const CreateProfessionModal: React.FC<CreateProfessionModalProps> = ({
               Profession Name
             </label>
             <Input
-              id="name"
-              {...register("name", { required: "Profession name is required" })}
-              placeholder="Enter profession name"
-            />
+  id="name"
+  maxLength={100} // ✅ hard limit in input
+  {...register("name", {
+    required: "Profession name is required",
+    maxLength: {
+      value: 100,
+      message: "Maximum 100 characters allowed",
+    },
+  })}
+  placeholder="Enter profession name"
+/>
             {errors.name && (
               <p className="text-red-500 text-sm">{errors.name.message}</p>
             )}

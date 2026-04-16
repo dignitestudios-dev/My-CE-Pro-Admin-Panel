@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
+
 interface User {
   _id: string;
   fullName: string;
@@ -26,6 +27,7 @@ interface User {
   licenseNumber: string;
   licenseExpiry: string;
   accountStatus: boolean;
+  profilePicture: string;
 }
 
 interface Course {
@@ -102,7 +104,28 @@ export function DataTable({
   const handleNextPage = () => {
     if (pagination.currentPage < pagination.totalPages) pagination.setCurrentPage(pagination.currentPage + 1);
   };
+function getStatusColor(status:any) {
+  switch (status?.toLowerCase()) {
+    case "active":
+      return "bg-green-500 text-white";
 
+    case "inactive":
+      return "bg-gray-500 text-white";
+
+    case "completed":
+      return "bg-blue-500 text-white";
+
+    case "incomplete":
+      return "bg-red-500 text-white";
+
+    case "pending":
+      return "bg-yellow-500 text-black";
+
+    default:
+      return "bg-gray-300 text-black";
+  }
+}
+console.log()
   return (
     <div className="w-full space-y-4">
       {/* Filters */}
@@ -226,23 +249,36 @@ export function DataTable({
               type === "users" ? (
                 reports.map((user: User) => (
                   <TableRow key={user._id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>{user.fullName?.[0]}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div>{user.fullName}</div>
-                          <div className="text-sm text-gray-500">{user.emailAddress}</div>
-                        </div>
-                      </div>
-                    </TableCell>
+                   <TableCell>
+  <div className="flex items-center gap-3">
+    
+    <Avatar className="h-8 w-8">
+      <AvatarImage
+        src={user.profilePicture || ""}
+        alt={user.fullName || "User"}
+      />
 
-                    <TableCell>{user.profession}</TableCell>
-                    <TableCell>{user.licenseNumber}</TableCell>
-                    <TableCell>{new Date(user.licenseExpiry).toLocaleDateString()}</TableCell>
+      <AvatarFallback>
+        {user.fullName?.charAt(0) || "U"}
+      </AvatarFallback>
+    </Avatar>
+
+    <div>
+      <div>{user.fullName || "-"}</div>
+      <div className="text-sm text-gray-500">
+        {user.emailAddress || "-"}
+      </div>
+    </div>
+  </div>
+</TableCell>
+
+                    <TableCell>{user.profession || "-"}</TableCell>
+                    <TableCell>{user.licenseNumber || "-"}</TableCell>
+                    <TableCell>{new Date(user.licenseExpiry || "-").toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Badge>{user.accountStatus ? "Active" : "Inactive"}</Badge>
+                      <Badge className={getStatusColor(user.accountStatus ? "active" : "inactive")}>
+                        {user.accountStatus ? "Active" : "Inactive"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Link href={`/dashboard/users/${user._id}`}>
@@ -262,7 +298,7 @@ export function DataTable({
                     <TableCell>{course.completedMinutes}</TableCell>
                     <TableCell>{course.completionPercentage}%</TableCell>
                     <TableCell>
-                      <Badge>{course.status}</Badge>
+                      <Badge className={getStatusColor(course.status)}>{course.status}</Badge>
                     </TableCell>
                   </TableRow>
                 ))

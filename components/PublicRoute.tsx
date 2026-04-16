@@ -16,6 +16,7 @@ export function PublicRoute({ children }: PublicRouteProps) {
   useEffect(() => {
     if (isAuthenticated) {
       router.push('/dashboard');
+      console.log('User is already logged in, redirecting to dashboard');
     }
   }, [isAuthenticated, router]);
 
