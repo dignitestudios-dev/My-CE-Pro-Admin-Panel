@@ -12,49 +12,68 @@ import { loginUser } from "@/lib/slices/authSlice";
 import { signInSchema } from "@/lib/validation/authschema";
 import type { AppDispatch } from "@/lib/store";
 
+// ✅ Sonner imports
+import { toast } from "sonner";
+import { Toaster } from "sonner";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/lib/store";
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  const {error} = useSelector((state: RootState) => state.auth);
   const router = useRouter();
 
-  const loginValues = {
-    email: "",
-    password: "",
-  };
-
   const formik = useFormik({
-    initialValues: loginValues,
+    initialValues: {
+      email: "",
+      password: "",
+    },
     validationSchema: signInSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: async (values, { setSubmitting, setErrors, resetForm }) => {
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         const payload = {
           email: values.email,
           password: values.password,
-        
         };
 
-        // Redux login
+        // ✅ API call
         await dispatch(loginUser(payload)).unwrap();
+
+        // ✅ success toast
+        toast.success("Login successful!");
+
+        // redirect
+        router.push("/dashboard");
+
+      } catch (err: any) {
+        console.log(err);
+        // ✅ backend message handle
      
 
-        // Login success → navigate
-      
-      } catch (err: any) {
-        // API error
+        // ✅ show toast
+        toast.error(err || "Login failed");
+
+        // ✅ fields empty (IMPORTANT)
         resetForm();
-        setErrors({ email: err?.message || "Login failed" });
+
         setSubmitting(false);
-        
       }
     },
   });
 
   return (
     <div className="w-full max-w-md mx-auto mt-12">
+
+      {/* ✅ Toaster */}
+      <Toaster position="top-right" />
+
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Welcome Back
+        </h2>
         <p className="text-gray-600">Sign in to your account</p>
       </div>
 
@@ -73,7 +92,9 @@ const Login = () => {
             onBlur={formik.handleBlur}
           />
           {formik.touched.email && formik.errors.email && (
-            <p className="text-red-500 text-sm">{formik.errors.email}</p>
+            <p className="text-red-500 text-sm">
+              {formik.errors.email}
+            </p>
           )}
         </div>
 
@@ -96,23 +117,36 @@ const Login = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
             >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
             </button>
           </div>
+
           {formik.touched.password && formik.errors.password && (
-            <p className="text-red-500 text-sm">{formik.errors.password}</p>
+            <p className="text-red-500 text-sm">
+              {formik.errors.password}
+            </p>
           )}
         </div>
-        <button
-    type="button"
-    onClick={() => router.push("/auth/forgot-password")}
-    className="text-sm text-blue-600 hover:underline"
-  >
-    Forgot Password?
-  </button>
 
-        {/* Submit Button */}
-        <Button type="submit" className="w-full" disabled={formik.isSubmitting}>
+        {/* Forgot Password */}
+        <button
+          type="button"
+          onClick={() => router.push("/auth/forgot-password")}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          Forgot Password?
+        </button>
+
+        {/* Submit */}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={formik.isSubmitting}
+        >
           {formik.isSubmitting ? "Signing In..." : "Sign In"}
         </Button>
 

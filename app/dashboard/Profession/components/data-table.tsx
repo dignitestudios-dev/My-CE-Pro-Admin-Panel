@@ -21,6 +21,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { fetchNotifications } from "@/lib/slices/notificationSlice";
 import { fetchProfessions } from "@/lib/slices/professionSlice";
+import EditProfessionModal from "./editprofessionmodal";
+import DeleteProfessionModal from "./deleteprofessionmodal";
 
 
 
@@ -40,10 +42,23 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
  
 
   
- 
+ const dispatch = useDispatch<AppDispatch>();
+
+const [showEditModal, setShowEditModal] = useState(false);
+const [selectedProfession, setSelectedProfession] = useState<any>(null);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 
+const handleEditClick = (profession: any) => {
+  setSelectedProfession(profession);
+  setShowEditModal(true);
+};
 
+
+const handleDeleteClick = (profession: any) => {
+  setSelectedProfession(profession);
+  setShowDeleteModal(true);
+};
   
 
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -67,7 +82,8 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>Profession Name</TableHead>
-              <TableHead>CE Hours</TableHead>
+              <TableHead className="text-lift">CE Hours</TableHead>
+              <TableHead className="">Actions</TableHead>
               
             </TableRow>
           </TableHeader>
@@ -83,11 +99,25 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
               professions.map((profession, index) => (
                 <TableRow key={profession._id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{profession.name || "-"}</TableCell>
-                  <TableCell>{profession.ceHours || "-"}</TableCell>
-                  <TableCell>
-                   
-                  </TableCell>
+                  <TableCell className="capitalize">{profession.name || "-"}</TableCell>
+                  <TableCell className="text-lift">{profession.ceHours || "-"}</TableCell>
+                <TableCell className="flex gap-2 ">
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={() => handleEditClick(profession)}
+  >
+    Edit
+  </Button>
+
+  <Button
+    variant="destructive"
+    size="sm"
+    onClick={() => handleDeleteClick(profession)}
+  >
+    Delete
+  </Button>
+</TableCell>
                 </TableRow>
               ))
             ) : (
@@ -136,7 +166,30 @@ export function DataTable({ professions, pagination, loading }: DataTableProps) 
             Next
           </Button>
         </div>
-      </div>
+      </div>?
+      <EditProfessionModal
+  open={showEditModal}
+  onClose={() => setShowEditModal(false)}
+  profession={selectedProfession}
+ onSuccess={() => {
+  dispatch(fetchProfessions({
+    page: pagination.currentPage,
+    limit: pagination.itemsPerPage,
+  }));
+}}
+/>
+
+<DeleteProfessionModal
+  open={showDeleteModal}
+  onClose={() => setShowDeleteModal(false)}
+  profession={selectedProfession}
+  onSuccess={() => {
+    dispatch(fetchProfessions({
+      page: pagination.currentPage,
+      limit: pagination.itemsPerPage,
+    }));
+  }}
+/>
     </div>
   );
 }

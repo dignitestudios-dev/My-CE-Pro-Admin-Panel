@@ -15,7 +15,8 @@ interface ApiUser {
   completedCourses?: number;          // Completed courses count, optional
   totalCEMinutes?: number;            // Total CE minutes, optional
   certificateUploadCount?: number;    // Certificates uploaded count, optional
-  courses?: Course[];                 // User ke courses, optional
+  courses?: Course[]; 
+  profilePicture?: string | null;          // User profile picture, optional
 }
 
 interface Course {
@@ -177,9 +178,9 @@ const userSlice = createSlice({
       const usersData = action.payload?.data?.users || [];
       const totalUsers = action.payload?.data?.totalUsers || 0;
       const activeUsers = action.payload?.data?.activateUsers || 0;
-      const deactivatedUsers = action.payload?.data?.deactivateUsers || 0;
+      const deactivatedUsers = action.payload?.data?.deactivatedUsers || 0;
       const pagination = action.payload?.pagination || null;
-
+      console.log(deactivatedUsers);
       state.users = usersData;
       state.totalUsers = totalUsers;
       state.activeUsers = activeUsers;

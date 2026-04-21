@@ -149,7 +149,7 @@ const fetchMsg = useCallback(async () => {
   const status = statusConfig[selected.status];
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 min-w-0">
+    <div className="flex-1 flex flex-col bg-gray-50 min-w-0 h-[calc(100vh-120px)]">
       {/* Chat Header */}
       <div className="bg-white border-b border-gray-100 px-4 md:px-6 py-3 flex items-center gap-3">
         {/* 🔙 Mobile Back */}
@@ -162,7 +162,7 @@ const fetchMsg = useCallback(async () => {
 
         {/* Avatar */}
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d580ff] to-[#b026ff] flex items-center justify-center text-white text-[13px] font-bold">
-          {selected.user.avatar}
+          <img src={selected.user.avatar} alt={selected.user.name} className="w-full h-full rounded-full object-cover" />
         </div>
 
         <div>
@@ -176,7 +176,7 @@ const fetchMsg = useCallback(async () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 md:px-6">
+      <div className="flex-1 overflow-y-auto px-3 md:px-6 ">
         <div className="max-w-4xl mx-auto flex flex-col">
           <div className="text-center my-2">
             <span className="text-[11px] text-gray-400 bg-gray-200 px-3 py-0.5 rounded-full">
@@ -211,7 +211,7 @@ const fetchMsg = useCallback(async () => {
       >
         {!isAdmin && (
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#d580ff] to-[#b026ff] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-            {selected.user.avatar}
+           <img src={selected.user.avatar} alt="User" className="w-full h-full rounded-full object-cover" />
           </div>
         )}
 

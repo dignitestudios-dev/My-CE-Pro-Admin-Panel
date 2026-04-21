@@ -40,7 +40,7 @@ export const fetchProfessions = createAsyncThunk(
 
       return response;
     } catch (err: any) {
-      return thunkAPI.rejectWithValue(err.message);
+      return (err);
     }
   }
 );

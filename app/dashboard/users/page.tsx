@@ -26,12 +26,21 @@ export default function UsersPage() {
   // Filters
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(""); // 👈 NEW
-
   const [accountStatus, setAccountStatus] = useState<"all" | "active" | "deactivated">("all");
   const [licenseExpired, setLicenseExpired] = useState<"all" | "true" | "false">("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // ✅ Debounce logic
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // ✅ API call
   // ✅ Debounce logic
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -59,11 +68,17 @@ export default function UsersPage() {
     currentPage,
     pageSize,
     debouncedSearch, // 👈 dependency change
+    debouncedSearch, // 👈 dependency change
     accountStatus,
     licenseExpired,
     startDate,
     endDate,
   ]);
+
+  // ✅ Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   // ✅ Reset page when search changes
   useEffect(() => {
@@ -81,6 +96,18 @@ export default function UsersPage() {
     },
   };
 
+  // Map ApiUser to User interface for DataTable compatibility
+  const mappedUsers = users.map((user) => ({
+    _id: user._id,
+    fullName: user.fullName,
+    emailAddress: user.emailAddress,
+    profession: user.profession,
+    licenseNumber: user.licenseNumber,
+    licenseExpiry: user.licenseExpiry,
+    accountStatus: user.accountStatus,
+    profilePicture: user.profilePicture || null, // Convert undefined to null
+  }));
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -95,7 +122,7 @@ export default function UsersPage() {
 
       <div className="@container/main px-4 lg:px-6 mt-8 lg:mt-12">
         <DataTable
-          users={users}
+          users={mappedUsers}
           pagination={paginationData}
           loading={loading}
           search={search}

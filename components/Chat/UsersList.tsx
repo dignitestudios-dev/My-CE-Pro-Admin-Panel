@@ -2,24 +2,29 @@ import { forwardRef, useState } from "react";
 import { Conversation, Status } from "@/constants/Data";
 import { LoaderPinwheel, Search } from "lucide-react";
 
+
 type UsersListProps = {
   convos: Conversation[];
   selected: Conversation | null;
   onSelect: (convo: Conversation) => void;
   onSearch: (value: string) => void;
   isFetchingMore: boolean;
+  pagination:any
 };
 
 const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
-  ({ convos, selected, onSelect, onSearch, isFetchingMore }, ref) => {
+  ({ convos, selected, onSelect, onSearch, isFetchingMore, pagination }, ref) => {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"all" | Status>("all");
 
     const totalUnread = convos.reduce((acc, c) => acc + c.unread, 0);
 
     const filtered = convos.filter((c) => {
+      const matchSearch = search.trim() === "" || 
+        c.user.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.lastMessage.toLowerCase().includes(search.toLowerCase());
       const matchFilter = filter === "all" || c.status === filter;
-      return matchFilter;
+      return matchSearch && matchFilter;
     });
 
     return (
@@ -31,15 +36,14 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
               Support Inbox
             </h2>
 
-            {totalUnread > 0 && (
               <span className="bg-[#b026ff] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
-                {totalUnread} new
+                {pagination?.totalItems}
               </span>
-            )}
+          
           </div>
 
           {/* Search */}
-          {/* <div className="relative mb-3">
+          <div className="relative mb-3">
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-400">
               <Search size={18} />
             </span>
@@ -53,11 +57,11 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
               placeholder="Search conversations…"
               className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-[13px]"
             />
-          </div> */}
+          </div>
         </div>
 
         {/* Conversation List */}
-        <div ref={ref} className="flex-1 py-4 overflow-y-auto">
+        <div ref={ref} className="flex-1  py-4 overflow-y-auto ">
           {filtered.map((c,i) => {
             const isActive = selected?.id === c.id;
             return (
@@ -70,7 +74,7 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
               >
                 <div className="flex items-start gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center">
-                    {c.user.avatar}
+                    <img src={c.user.avatar} alt="" className="w-9 h-9 rounded-full" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -78,11 +82,16 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
                       <span className="text-sm font-semibold truncate">
                         {c.user.name}
                       </span>
-                      <span className="text-xs text-gray-400">{c.time}</span>
+                     
+                        <span className="text-xs text-gray-400">{c.time} </span>
+                       
+                    
                     </div>
 
-                    <p className="text-xs text-gray-400 truncate">
+                    <p className="text-xs text-gray-400 truncate flex justify-between">
+
                       {c.lastMessage}
+                       <span className=" text-gray-400">{c.unread}</span>
                     </p>
                   </div>
                 </div>

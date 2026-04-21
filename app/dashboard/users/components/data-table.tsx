@@ -27,6 +27,7 @@ interface User {
   licenseNumber: string | number | null;
   licenseExpiry: string | null;
   accountStatus: boolean;
+  profilePicture: string | null
 }
 
 interface DataTableProps {
@@ -85,6 +86,11 @@ export function DataTable({
 
   const getStatusColor = (status: boolean) =>
     status ? "text-green-600 bg-green-50" : "text-gray-600 bg-gray-50";
+const truncateText = (value: string | null | undefined, max = 14): string => {
+  if (!value) return "N/A";
+  if (value.length <= max) return value;
+  return `${value.slice(0, max)}...`;
+};
 
   return (
     <div className="w-full space-y-4">
@@ -163,9 +169,14 @@ export function DataTable({
                 <TableRow key={user._id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>{user.fullName?.[0] || "U"}</AvatarFallback>
-                      </Avatar>
+          <img
+  src={
+    user?.profilePicture ||
+    `https://ui-avatars.com/api/?name=${user?.fullName}`
+  }
+  className="w-8 h-8 rounded-full"
+/>
+                      
                       <div className="flex flex-col">
                         <span className="font-medium">{user.fullName || "Unknown"}</span>
                         <span className="text-sm">{user.emailAddress}</span>
@@ -173,8 +184,8 @@ export function DataTable({
                     </div>
                   </TableCell>
 
-                  <TableCell>{user.profession || "-"}</TableCell>
-                  <TableCell>{user.licenseNumber || "-"}</TableCell>
+                  <TableCell>{truncateText(user.profession || "-")}</TableCell>
+                  <TableCell>{truncateText(String(user.licenseNumber))}</TableCell>
                   <TableCell>{user.licenseExpiry ? new Date(user.licenseExpiry).toLocaleDateString() : "-"}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(user.accountStatus)}>

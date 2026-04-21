@@ -11,12 +11,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { AppDispatch, RootState } from "@/lib/store";
 import { forgotPassword, setEmail } from "@/lib/slices/authSlice";
+import { toast, Toaster } from "sonner";
 
 const ForgotPassword = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
-
+  const {  loading, error } = useSelector((state: RootState) => state.auth);
+  
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),
   });
@@ -30,13 +31,14 @@ const ForgotPassword = () => {
         dispatch(setEmail(values.email));
         router.push("/auth/verification");
       } catch (err) {
-        console.log("Forgot password error:", err);
+        toast.error(err as string);
       }
     },
   });
 
   return (
     <div className="w-full max-w-md mx-auto mt-12">
+      <Toaster position="top-right" />
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Forgot Password</h2>
         <p className="text-gray-600">
@@ -59,7 +61,7 @@ const ForgotPassword = () => {
           {formik.touched.email && formik.errors.email && (
             <p className="text-red-500 text-sm">{formik.errors.email}</p>
           )}
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+   
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>

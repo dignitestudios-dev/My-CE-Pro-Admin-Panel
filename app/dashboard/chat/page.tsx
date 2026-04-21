@@ -17,6 +17,9 @@ export default function ChatSupport() {
   const [selected, setSelected] = useState<Conversation | null>(null);
   const [search, setSearch] = useState("");
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+   const { pagination } = useSelector(
+    (state: RootState) => state.chat
+  );
 
   // ✅ Use refs to avoid stale closures in scroll handler
   const pageRef = useRef(1);
@@ -50,29 +53,26 @@ export default function ChatSupport() {
         const mapped: Conversation[] = newData.map((item: any) => {
           const chatRoom = item.chatRoom;
           const otherUser = item.chatUsers.find((u: any) => !u.isSelf);
+console.log(otherUser,"otherUser" )
 
-          return {
-            id: String(chatRoom._id || chatRoom.id),
-            user: {
-              name: String(otherUser?.user?.fullName || "Unknown"),
-              avatar: String(otherUser?.user?.fullName?.charAt(0) || "U"),
-              email: String(otherUser?.user?.email || ""),
-            },
-            lastMessage: chatRoom.lastMessage?.content
-              ? chatRoom.lastMessage.content
-              : chatRoom.lastMessage?.type === "media"
-                ? "Media"
-                : "No messages yet",
-            time: new Date(chatRoom.updatedAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            unread: Number(otherUser?.unreadCount || 0),
-            status: "open",
-            priority: "medium",
-            messages: [],
-          };
-        });
+      return {
+        id: chatRoom.id,
+        user: {
+          name: otherUser?.user?.fullName || "Unknown",
+          avatar: otherUser?.user?.profilePicture,
+          email: otherUser?.user?.email || "",
+        },
+        lastMessage: chatRoom.lastMessage?.content ? chatRoom.lastMessage?.content : "No messages yet",
+        time: new Date(chatRoom.updatedAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        unread: otherUser?.unreadCount || 0,
+        status: "open", // optionally map from API status
+        priority: "medium", // optional
+        messages: [], // optional: later can populate with message API
+      };
+    });
 
         if (reset) {
           setConvos(mapped);
@@ -170,12 +170,12 @@ export default function ChatSupport() {
   const syncedSelected = convos.find((c) => c.id === selected?.id) ?? null;
 
   return (
-    <div className="flex bg-gray-50 h-screen overflow-hidden">
+    <div className="flex bg-gray-50  overflow-hidden ">
       {/* Sidebar */}
       <div
         className={`
           ${selected ? "hidden md:flex" : "flex"}
-          w-full md:w-[320px] lg:w-[350px]
+          w-full md:w-[320px] h-[80vh] lg:w-[350px]
         `}
       >
         <UsersList
@@ -185,6 +185,7 @@ export default function ChatSupport() {
           onSelect={handleSelect}
           onSearch={handleSearch}
           isFetchingMore={isFetchingMore}
+          pagination ={pagination}
         />
       </div>
 

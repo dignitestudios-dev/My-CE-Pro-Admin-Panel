@@ -6,24 +6,29 @@ interface DashboardState {
   stats: DashboardStats | null;
   loading: boolean;
   error: string | null;
+  graph: any;
+  
 }
 
 const initialState: DashboardState = {
   stats: null,
   loading: false,
   error: null,
+  graph: null,
 };
 
 // Async thunk
 export const fetchDashboardStats = createAsyncThunk(
   "dashboard/fetchStats",
-  async (_, thunkAPI) => {
+  async (dates: { startDate: string; endDate: string } | undefined, { rejectWithValue }: any) => {
     try {
-      const data = await getDashboardStats();
+      // Convert dates format to match API expectation
+      const apiDates = dates ? { start: dates.startDate, end: dates.endDate } : undefined;
+      const data = await getDashboardStats(apiDates);
 
       return data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -41,11 +46,14 @@ const dashboardSlice = createSlice({
       .addCase(fetchDashboardStats.fulfilled, (state, action) => {
         state.loading = false;
         state.stats = action.payload;
+        state.graph = action.payload.graph;
+       
       })
       .addCase(fetchDashboardStats.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
+
   },
 });
 

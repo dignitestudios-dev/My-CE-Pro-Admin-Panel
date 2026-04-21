@@ -1,6 +1,7 @@
 // lib/slices/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login as loginAPI, forgotPassword as forgotPasswordAPI, verifyOTP as verifyOTPAPI , updatePassword as updatePasswordAPI } from '../api/auth.api'; // tumhara API file
+import Cookies from 'js-cookie';
 
 // ------------------ Types ------------------
 export interface User {
@@ -17,11 +18,38 @@ interface AuthState {
   email: string | null;
 }
 
+// ------------------ Helper Functions ------------------
+// Check if token exists and is valid
+export const validateToken = (): boolean => {
+  const token = Cookies.get('authToken');
+  if (!token) {
+    return false;
+  }
+  
+  try {
+    // Basic JWT token validation (check if it's not expired)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Date.now() / 1000;
+    
+    if (payload.exp && payload.exp < currentTime) {
+      // Token expired, remove it
+      Cookies.remove('authToken');
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    // Invalid token format, remove it
+    Cookies.remove('authToken');
+    return false;
+  }
+};
+
 // ------------------ Initial State ------------------
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  loading: true,
+  loading: false,
   error: null,
   email: null,
 };
@@ -42,13 +70,22 @@ export const loginUser  = createAsyncThunk<User, { email: string; password: stri
   }
 );
 
-export const forgotPassword = createAsyncThunk<void, { email: string }>(
+export const forgotPassword = createAsyncThunk<
+  any,
+  { email: string },
+  { rejectValue: string }
+>(
   'auth/forgotPassword',
   async (credentials, thunkAPI) => {
     try {
-      await forgotPasswordAPI(credentials.email);
+      const data = await forgotPasswordAPI(credentials.email);
+      return data;
     } catch (err: any) {
-      return thunkAPI.rejectWithValue(err.response?.data?.message || 'Failed to send reset link');
+      console.log(err, "errooor-");
+
+      return thunkAPI.rejectWithValue(
+        err?.response?.data?.message || "Something went wrong"
+      );
     }
   }
 );
@@ -75,6 +112,18 @@ export const updatePassword = createAsyncThunk<void, { password: string }>(
   }
 );
 
+  // Token validation thunk
+  export const checkAuthStatus = createAsyncThunk(
+    'auth/checkStatus',
+    async (_, thunkAPI) => {
+      const isValid = validateToken();
+      if (!isValid) {
+        return thunkAPI.rejectWithValue('Token expired or invalid');
+      }
+      return true;
+    }
+  );
+
 // ------------------ Slice ------------------
 const authSlice = createSlice({
   name: "auth",
@@ -85,7 +134,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.loading = false;
             state.error = null;
-            cookieStore.delete("authToken");
+            Cookies.remove("authToken");
     },
     setEmail: (state, action: PayloadAction<string>) => {
       state.email = action.payload;
@@ -104,7 +153,7 @@ const authSlice = createSlice({
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.loading = false;
-      state.isAuthenticated = false;
+     state.isAuthenticated = false;
       state.error = action.payload as string;
     });
 
@@ -118,6 +167,7 @@ const authSlice = createSlice({
     });
     builder.addCase(forgotPassword.rejected, (state, action) => {
       state.loading = false;
+      
       state.error = action.payload as string;
     });
 
@@ -134,6 +184,24 @@ builder.addCase (updatePassword.fulfilled, (state) => {
 builder.addCase (updatePassword.rejected, (state, action) => {
   state.loading = false;
   state.error = action.payload as string;
+});
+
+// Check auth status
+builder.addCase(checkAuthStatus.pending, (state) => {
+  state.loading = true;
+});
+
+builder.addCase(checkAuthStatus.fulfilled, (state) => {
+  state.loading = false;
+  // Token is valid, keep current state
+});
+
+builder.addCase(checkAuthStatus.rejected, (state, action) => {
+  state.loading = false;
+  state.user = null;
+  state.isAuthenticated = false;
+  state.error = action.payload as string;
+  Cookies.remove('authToken');
 });
 
   },

@@ -11,11 +11,12 @@ interface PublicRouteProps {
 
 export function PublicRoute({ children }: PublicRouteProps) {
   const router = useRouter();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-const token=Cookies?.get("authToken");
+  const token = Cookies?.get("authToken");
+  
   useEffect(() => {
-    if (token) {
+    if ( token) {
       router.push('/dashboard');
+      console.log('User is already logged in, redirecting to dashboard');
     }
   }, [token, router]);
 

@@ -20,7 +20,7 @@ export const login = async (credentials: any) => {
 export const register = async (credentials: any) => {
   const response = await API.post('/auth/register', credentials);
   if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token);
+    Cookies.set('authToken', response.data.token);
   }
   return response.data;
 };
@@ -33,7 +33,7 @@ export const logout = async () => {
     console.error('Logout error:', error);
   } finally {
     // Always remove token locally
-    localStorage.removeItem('authToken');
+    Cookies.remove('authToken');
   }
 };
 
@@ -42,11 +42,15 @@ export const logout = async () => {
 export const forgotPassword = async (email: string) => {
   try {
     const response = await API.post('/admin/auth/sendOTP', { email });
-    // The API should return a message like "Password reset link sent"
     return response.data;
   } catch (error: any) {
-    // Handle errors
-    throw new Error(error.response?.data?.message || 'Failed to send reset link');
+  
+
+    // ❌ Galat
+    // throw new Error(error as any);
+
+    // ✅ Sahi (original error forward karo)
+    throw error;
   }
 };
 
@@ -55,8 +59,8 @@ export const verifyOTP = async (otp: number, email: string) => {
     const response = await API.post('/admin/auth/verifyOTP', { otp, email });
     Cookies.set('authToken', response.data.data.token, { expires: 7,});
     return response.data;
-  } catch (error: any) {
-    throw new Error(error.response?.data?.message || 'Failed to verify OTP');
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -79,7 +83,7 @@ export const getProfile = async () => {
 export const refreshToken = async () => {
   const response = await API.post('/auth/refresh');
   if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token);
+    Cookies.set('authToken', response.data.token);
   }
   return response.data;
 };

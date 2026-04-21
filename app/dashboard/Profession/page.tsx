@@ -43,7 +43,7 @@ useEffect(() => {
 
         <div>
            <div className="flex justify-end mb-4">
-        <Button onClick={() => setShowCreateModal(true)}>Add Profession</Button>
+        <Button className="bg-primary" onClick={() => setShowCreateModal(true)}>Add Profession</Button>
       </div>
            <DataTable professions={professions} pagination={paginationData} loading={loading} />
            <CreateProfessionModal
