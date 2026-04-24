@@ -28,6 +28,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
+    watch, 
   } = useForm<NotificationFormInputs>();
 
   const onSubmit: SubmitHandler<NotificationFormInputs> = (data) => {
@@ -35,6 +36,8 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({
     reset(); // form reset after submit
     setShowCreateModal(false);
   };
+
+  const description = watch("description");
 
   if (!showCreateModal) return null; // modal hidden if false
 
@@ -72,12 +75,14 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({
             </label>
             <Textarea
               id="description"
+              maxLength={500}
               {...register("description", { required: "Description is required" })}
               placeholder="Enter notification description"
             />
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description.message}</p>
             )}
+            <span className="flex justify-end text-xs text-gray-500">{description?.length || 0}/500</span>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

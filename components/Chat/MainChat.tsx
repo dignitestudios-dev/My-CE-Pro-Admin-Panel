@@ -90,14 +90,25 @@ const fetchMsg = useCallback(async () => {
       // dispatch(getChatRooms({ page: 1, limit: 20, type: isActiveTab }));
     };
 
+    const handleJoinChatRoom = (data: any) => {
+      console.log("Joined chat room:", data);
+      // Update read/unread status when joining a room
+      if (data?.id) {
+        // You can dispatch actions here to update read/unread counts
+        console.log(`Chat room ${data.id} joined - updating read status`);
+      }
+    };
+
     socket.on(SOCKET_EVENTS.CHAT.RECEIVE_MESSAGE, handleReceiveMessage);
     socket.on("socketError", handleSendError); // if backend sends this
     socket.on("chat:unread:count", handleUnreadCount);
+    socket.on("joinChatRoom", handleJoinChatRoom); // Listen for joinChatRoom event
 
     return () => {
       socket.off(SOCKET_EVENTS.CHAT.RECEIVE_MESSAGE, handleReceiveMessage);
       socket.off("socketError", handleSendError);
       socket.off("chat:unread:count", handleUnreadCount);
+      socket.off("joinChatRoom", handleJoinChatRoom); // Cleanup joinChatRoom listener
     };
   }, [socket, dispatch]);
 

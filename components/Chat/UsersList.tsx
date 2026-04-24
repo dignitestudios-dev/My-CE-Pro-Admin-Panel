@@ -1,7 +1,12 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useContext, useEffect, useState } from "react";
 import { Conversation, Status } from "@/constants/Data";
 import { LoaderPinwheel, Search } from "lucide-react";
+import { addMessage } from "@/lib/slices/chatSlice";
 
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store";
+import { SOCKET_EVENTS } from "@/constants/socketEvents";
+import SocketContext from "@/contexts/SocketContext";
 
 type UsersListProps = {
   convos: Conversation[];
@@ -9,24 +14,30 @@ type UsersListProps = {
   onSelect: (convo: Conversation) => void;
   onSearch: (value: string) => void;
   isFetchingMore: boolean;
-  pagination:any
+  pagination: any;
 };
 
 const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
-  ({ convos, selected, onSelect, onSearch, isFetchingMore, pagination }, ref) => {
+  (
+    { convos, selected, onSelect, onSearch, isFetchingMore, pagination },
+    ref,
+  ) => {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"all" | Status>("all");
-
+    const dispatch = useDispatch<AppDispatch>();
+    const socketContext = useContext(SocketContext);
+    const { socket } = socketContext || {};
     const totalUnread = convos.reduce((acc, c) => acc + c.unread, 0);
 
     const filtered = convos.filter((c) => {
-      const matchSearch = search.trim() === "" || 
+      const matchSearch =
+        search.trim() === "" ||
         c.user.name.toLowerCase().includes(search.toLowerCase()) ||
         c.lastMessage.toLowerCase().includes(search.toLowerCase());
       const matchFilter = filter === "all" || c.status === filter;
       return matchSearch && matchFilter;
     });
-
+    console.log("filtered", filtered);
     return (
       <div className="bg-white border-r border-gray-100 flex flex-col w-full">
         {/* Header */}
@@ -36,10 +47,9 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
               Support Inbox
             </h2>
 
-              <span className="bg-[#b026ff] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
-                {pagination?.totalItems}
-              </span>
-          
+            <span className="bg-[#b026ff] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+              {pagination?.totalItems}
+            </span>
           </div>
 
           {/* Search */}
@@ -62,7 +72,7 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
 
         {/* Conversation List */}
         <div ref={ref} className="flex-1  py-4 overflow-y-auto ">
-          {filtered.map((c,i) => {
+          {filtered.map((c, i) => {
             const isActive = selected?.id === c.id;
             return (
               <div
@@ -74,7 +84,11 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
               >
                 <div className="flex items-start gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center">
-                    <img src={c.user.avatar} alt="" className="w-9 h-9 rounded-full" />
+                    <img
+                      src={c.user.avatar}
+                      alt=""
+                      className="w-9 h-9 rounded-full"
+                    />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -82,16 +96,18 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
                       <span className="text-sm font-semibold truncate">
                         {c.user.name}
                       </span>
-                     
-                        <span className="text-xs text-gray-400">{c.time} </span>
-                       
-                    
+
+                      <span className="text-xs text-gray-400">{c.time} </span>
                     </div>
 
                     <p className="text-xs text-gray-400 truncate flex justify-between">
-
                       {c.lastMessage}
-                       <span className=" text-gray-400">{c.unread}</span>
+
+                      {c.unread > 0 ? (
+                        <span className="bg-purple-500 text-xs text-white  px-2 py-0.5 rounded-full">
+                          {c.unread}
+                        </span>
+                      ) : null}
                     </p>
                   </div>
                 </div>
@@ -100,18 +116,18 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
           })}
 
           {/* Bottom Loader */}
-        {isFetchingMore && (
-  <div className="text-center py-10">
-    <LoaderPinwheel className="mx-auto animate-spin text-violet-500" />
-    <p className="text-gray-400 text-[15px] mt-2">
-      Fetching more conversations…
-    </p>
-  </div>
-)}
+          {isFetchingMore && (
+            <div className="text-center py-10">
+              <LoaderPinwheel className="mx-auto animate-spin text-violet-500" />
+              <p className="text-gray-400 text-[15px] mt-2">
+                Fetching more conversations…
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
-  }
+  },
 );
 
 UsersList.displayName = "UsersList";

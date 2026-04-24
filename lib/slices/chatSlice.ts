@@ -14,6 +14,7 @@ interface ChatState {
     pagination: Pagination | null;
     loading: boolean;
     error: string | null;
+    listPagination: Pagination | null;
 }
 
 const initialState: ChatState = {
@@ -22,6 +23,7 @@ const initialState: ChatState = {
     pagination: null,
     loading: false,
     error: null,
+    listPagination: null,
 };
 
 interface ChatFetchParams {
@@ -79,7 +81,7 @@ const chatSlice = createSlice({
                 // API response structure
                 state.loading = false;
                 state.chatRooms = action.payload.data;
-                state.pagination = action.payload.pagination;
+                state.listPagination = action.payload.pagination;
             })
 
             .addCase(fetchChatRooms.rejected, (state, action) => {

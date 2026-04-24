@@ -51,13 +51,13 @@ const Login = () => {
       } catch (err: any) {
         console.log(err);
         // ✅ backend message handle
-     
 
         // ✅ show toast
         toast.error(err || "Login failed");
 
-        // ✅ fields empty (IMPORTANT)
-        resetForm();
+        // ✅ Reset only password field, keep email
+        formik.setFieldValue("password", "");
+        formik.setFieldTouched("password", false);
 
         setSubmitting(false);
       }

@@ -184,9 +184,9 @@ const truncateText = (value: string | null | undefined, max = 14): string => {
                     </div>
                   </TableCell>
 
-                  <TableCell>{truncateText(user.profession || "-")}</TableCell>
-                  <TableCell>{truncateText(String(user.licenseNumber))}</TableCell>
-                  <TableCell>{user.licenseExpiry ? new Date(user.licenseExpiry).toLocaleDateString() : "-"}</TableCell>
+                  <TableCell>{truncateText(user.profession || "")}</TableCell>
+                  <TableCell>{truncateText(String(user.licenseNumber || ""))}</TableCell>
+                  <TableCell>{new Date(user.licenseExpiry || "").toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(user.accountStatus)}>
                       {user.accountStatus ? "Active" : "Inactive"}

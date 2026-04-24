@@ -29,10 +29,11 @@ interface SocketContextValue {
   disconnect?: () => void;
   emit?: (event: string, payload?: any) => void;
   readChat: (roomId: string) => void;
+  joinChatRoom: (chatRoomId: string) => void;
   sendMessage?: (
     payload: SendMessagePayload,
     callback?: (response: AckResponse) => void,
-  ) => void; // ✅ typed with optional callback
+  ) => void; // typed with optional callback
 }
 
 export interface SendMessagePayload {
@@ -122,6 +123,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
     readChat: (roomId: string) => {
       client?.emit(SOCKET_EVENTS.CHAT.READ, { roomId });
+    },
+
+    joinChatRoom: (chatRoomId: string) => {
+      client?.emit(SOCKET_EVENTS.CHAT.JOIN_ROOM, { chatRoomId });
     },
 
     // ✅ socket.emit natively supports (event, payload, callback) — use it directly

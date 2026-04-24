@@ -7,17 +7,19 @@ import { fetchChatRooms } from "@/lib/slices/chatSlice";
 import type { Conversation, Message } from "@/constants/Data";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useSocket from "@/socket/useSocket";
 
 const LIMIT = 10;
 
 export default function ChatSupport() {
   const dispatch = useDispatch<AppDispatch>();
+  const { socket } = useSocket(); // Get socket instance
 
   const [convos, setConvos] = useState<Conversation[]>([]);
   const [selected, setSelected] = useState<Conversation | null>(null);
   const [search, setSearch] = useState("");
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-   const { pagination } = useSelector(
+   const { listPagination } = useSelector(
     (state: RootState) => state.chat
   );
 
@@ -49,6 +51,7 @@ export default function ChatSupport() {
         );
 
         const newData = res?.payload?.data || [];
+       
 
         const mapped: Conversation[] = newData.map((item: any) => {
           const chatRoom = item.chatRoom;
@@ -67,7 +70,7 @@ console.log(otherUser,"otherUser" )
           hour: "2-digit",
           minute: "2-digit",
         }),
-        unread: otherUser?.unreadCount || 0,
+        unread: chatRoom?.unreadCount || 0,
         status: "open", // optionally map from API status
         priority: "medium", // optional
         messages: [], // optional: later can populate with message API
@@ -94,6 +97,42 @@ console.log(otherUser,"otherUser" )
     [dispatch],
   );
 
+  useEffect(() => {
+  if (!socket) return;
+
+  const handleNotification = (data: any) => {
+    console.log("📩 Notification received:", data);
+
+    if (data?.context !== "message") return;
+
+    const { chatRoom, message } = data?.data || {};
+    if (!chatRoom || !message) return;
+
+    setConvos((prev) =>
+      prev.map((c) => {
+        if (c.id !== chatRoom.id) return c;
+
+        return {
+          ...c,
+          lastMessage: message.content,
+          time: new Date(message.createdAt).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          // Only increment unread if this room is NOT currently selected
+          unread: selected?.id === chatRoom.id ? 0 : chatRoom.unreadCount,
+        };
+      })
+    );
+  };
+
+  socket.on("notification", handleNotification);
+
+  return () => {
+    socket.off("notification", handleNotification);
+  };
+}, [socket, selected]); // selected needed to check if room is active
+
   // Initial load
   useEffect(() => {
     fetchRooms(true);
@@ -119,6 +158,18 @@ console.log(otherUser,"otherUser" )
   }, [fetchRooms]); // fetchRooms is stable due to useCallback with no deps
 
   const handleSelect = (convo: Conversation) => {
+    // Join the chat room when user clicks on it
+    socket.emit("joinChatRoom", { id: convo.id });
+  
+    
+    // Update the conversation list to reset unread count
+    setConvos(prev => 
+      prev.map(c => 
+        c.id === convo.id ? { ...c, unread: 0 } : c
+      )
+    );
+    
+    // Set the selected conversation with unread count 0
     setSelected({ ...convo, unread: 0 });
   };
 
@@ -185,7 +236,7 @@ console.log(otherUser,"otherUser" )
           onSelect={handleSelect}
           onSearch={handleSearch}
           isFetchingMore={isFetchingMore}
-          pagination ={pagination}
+          pagination ={listPagination}
         />
       </div>
 

@@ -34,7 +34,7 @@ export default function DeleteProfessionModal({
       setTimeout(() => {
         onClose();
         onSuccess?.();
-      }, 800);
+      }, 1000);
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Delete failed"

@@ -272,9 +272,9 @@ console.log()
   </div>
 </TableCell>
 
-                    <TableCell>{user.profession || "-"}</TableCell>
-                    <TableCell>{user.licenseNumber || "-"}</TableCell>
-                    <TableCell>{new Date(user.licenseExpiry || "-").toLocaleDateString()}</TableCell>
+                    <TableCell>{user.profession || "N/A"}</TableCell>
+                    <TableCell>{user.licenseNumber || "N/A"}</TableCell>
+                    <TableCell>{new Date(user.licenseExpiry || "").toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(user.accountStatus ? "active" : "inactive")}>
                         {user.accountStatus ? "Active" : "Inactive"}
