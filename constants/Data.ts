@@ -1,8 +1,12 @@
 export type Message = {
-    id: number;
-    from: "user" | "admin";
-    text: string;
-    time: string;
+  id: number | string;
+  from: "admin" | "user";
+  text: string | null;
+  isDeleted?: boolean;
+  isEdited?: boolean;
+  replyTo?: string | null; // ✅ naya
+  createdAt?: string;
+  time: string;
 };
 
 export type User = {

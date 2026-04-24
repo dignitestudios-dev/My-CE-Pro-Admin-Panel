@@ -139,7 +139,7 @@ const truncateText = (value: string | null | undefined, max = 14): string => {
 
         <div className="space-y-2">
           <Label className="text-sm font-medium">End Date</Label>
-          <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          <Input type="date"  value={endDate} onChange={(e) => setEndDate(e.target.value)} />
         </div>
       </div>
 

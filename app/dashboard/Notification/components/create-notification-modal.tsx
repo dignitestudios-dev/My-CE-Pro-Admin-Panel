@@ -38,6 +38,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({
   };
 
   const description = watch("description");
+  const title = watch("title");
 
   if (!showCreateModal) return null; // modal hidden if false
 
@@ -61,12 +62,14 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({
             </label>
             <Input
               id="title"
+              maxLength={100}
               {...register("title", { required: "Title is required" })}
               placeholder="Enter notification title"
             />
             {errors.title && (
               <p className="text-red-500 text-sm">{errors.title.message}</p>
             )}
+            <span className="flex justify-end text-xs text-gray-500">{title?.length || 0}/100</span>
           </div>
 
           <div className="space-y-2">

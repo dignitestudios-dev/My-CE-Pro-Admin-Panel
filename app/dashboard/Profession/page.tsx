@@ -30,6 +30,7 @@ const paginationData = {
 };
 
 useEffect(() => {
+  
   dispatch(
     fetchProfessions({
       page: currentPage,
@@ -49,12 +50,15 @@ useEffect(() => {
            <CreateProfessionModal
   showCreateModal={showCreateModal}
   setShowCreateModal={setShowCreateModal}
-  onSuccess={() => dispatch(
-    fetchProfessions({
-      page: currentPage,
-      limit: pageSize,
-    })
-  )} // optional
+  onSuccess={() => {
+    setCurrentPage(1); // Reset to page 1
+    dispatch(
+      fetchProfessions({
+        page: currentPage,
+        limit: pageSize,
+      })
+    );
+  }}
 />
         </div>
     );

@@ -166,7 +166,7 @@ const handleDeleteClick = (profession: any) => {
             Next
           </Button>
         </div>
-      </div>?
+      </div>
       <EditProfessionModal
   open={showEditModal}
   onClose={() => setShowEditModal(false)}
@@ -184,6 +184,7 @@ const handleDeleteClick = (profession: any) => {
   onClose={() => setShowDeleteModal(false)}
   profession={selectedProfession}
   onSuccess={() => {
+    pagination.setCurrentPage(1); // Reset to page 1
     dispatch(fetchProfessions({
       page: pagination.currentPage,
       limit: pagination.itemsPerPage,

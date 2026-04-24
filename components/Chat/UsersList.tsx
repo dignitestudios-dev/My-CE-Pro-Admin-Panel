@@ -1,12 +1,6 @@
-import { forwardRef, useContext, useEffect, useState } from "react";
+import { forwardRef, useState } from "react";
 import { Conversation, Status } from "@/constants/Data";
 import { LoaderPinwheel, Search } from "lucide-react";
-import { addMessage } from "@/lib/slices/chatSlice";
-
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/lib/store";
-import { SOCKET_EVENTS } from "@/constants/socketEvents";
-import SocketContext from "@/contexts/SocketContext";
 
 type UsersListProps = {
   convos: Conversation[];
@@ -24,29 +18,21 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
   ) => {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"all" | Status>("all");
-    const dispatch = useDispatch<AppDispatch>();
-    const socketContext = useContext(SocketContext);
-    const { socket } = socketContext || {};
-    const totalUnread = convos.reduce((acc, c) => acc + c.unread, 0);
 
+    // ✅ Sirf status filter - search backend se ho raha hai
     const filtered = convos.filter((c) => {
-      const matchSearch =
-        search.trim() === "" ||
-        c.user.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.lastMessage.toLowerCase().includes(search.toLowerCase());
       const matchFilter = filter === "all" || c.status === filter;
-      return matchSearch && matchFilter;
+      return matchFilter;
     });
-    console.log("filtered", filtered);
+
     return (
       <div className="bg-white border-r border-gray-100 flex flex-col w-full">
         {/* Header */}
         <div className="px-3 md:px-4">
-          <div className="flex items-center justify-between ">
+          <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-[#1a1a2e]">
               Support Inbox
             </h2>
-
             <span className="bg-[#b026ff] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
               {pagination?.totalItems}
             </span>
@@ -57,12 +43,13 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-gray-400">
               <Search size={18} />
             </span>
-
             <input
               value={search}
               onChange={(e) => {
-                setSearch(e.target.value);
-                onSearch(e.target.value);
+                const value = e.target.value;
+                const trimmedValue = value.trim();
+                setSearch(value); // raw value state mein
+                onSearch(trimmedValue); // trimmed value backend ko
               }}
               placeholder="Search conversations…"
               className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-[13px]"
@@ -71,51 +58,61 @@ const UsersList = forwardRef<HTMLDivElement, UsersListProps>(
         </div>
 
         {/* Conversation List */}
-        <div ref={ref} className="flex-1  py-4 overflow-y-auto ">
-          {filtered.map((c, i) => {
-            const isActive = selected?.id === c.id;
-            return (
-              <div
-                key={i}
-                onClick={() => onSelect(c)}
-                className={`py-3 px-3 border-b cursor-pointer ${
-                  isActive ? "bg-violet-50" : "hover:bg-violet-50/50"
-                }`}
-              >
-                <div className="flex items-start gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center">
-                    <img
-                      src={c.user.avatar}
-                      alt=""
-                      className="w-9 h-9 rounded-full"
-                    />
-                  </div>
+        {/* Conversation List */}
+        <div ref={ref} className="flex-1 py-4 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <p className="text-gray-400 text-sm font-medium">
+                No conversations found
+              </p>
+              <p className="text-gray-300 text-xs mt-1">
+                Try adjusting your search or filters
+              </p>
+            </div>
+          ) : (
+            filtered.map((c) => {
+              const isActive = selected?.id === c.id;
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between">
-                      <span className="text-sm font-semibold truncate">
-                        {c.user.name}
-                      </span>
-
-                      <span className="text-xs text-gray-400">{c.time} </span>
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => onSelect(c)}
+                  className={`py-3 px-3 border-b cursor-pointer ${
+                    isActive ? "bg-violet-50" : "hover:bg-violet-50/50"
+                  }`}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center">
+                      <img
+                        src={c.user.avatar}
+                        alt=""
+                        className="w-9 h-9 rounded-full"
+                      />
                     </div>
 
-                    <p className="text-xs text-gray-400 truncate flex justify-between">
-                      {c.lastMessage}
-
-                      {c.unread > 0 ? (
-                        <span className="bg-purple-500 text-xs text-white  px-2 py-0.5 rounded-full">
-                          {c.unread}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-semibold truncate">
+                          {c.user.name}
                         </span>
-                      ) : null}
-                    </p>
+                        <span className="text-xs text-gray-400">{c.time}</span>
+                      </div>
+
+                      <p className="text-xs text-gray-400 truncate flex justify-between">
+                        {c.lastMessage}
+                        {c.unread > 0 ? (
+                          <span className="bg-purple-500 text-xs text-white px-2 py-0.5 rounded-full">
+                            {c.unread}
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
 
-          {/* Bottom Loader */}
           {isFetchingMore && (
             <div className="text-center py-10">
               <LoaderPinwheel className="mx-auto animate-spin text-violet-500" />

@@ -6,5 +6,8 @@ export const SOCKET_EVENTS = {
     RECEIVE_MESSAGE: "receiveMessage",
     RECEIVE_UPDATED: "chat:receive:updated",
     JOIN_ROOM: "joinChatRoom",
+    DELETE_MESSAGE: "deleteMessage",
+    UPDATED_CHATROOM: "updatedChatroom",
+    EDIT_MESSAGE: "editMessage",
   },
 };

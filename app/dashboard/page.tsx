@@ -78,7 +78,7 @@ export default function DashboardPage() {
 
       
     </div>
- <div className="mb-4 flex flex-wrap items-end justify-end gap-3 rounded-xl border p-4">
+ {/* <div className="mb-4 flex flex-wrap items-end justify-end gap-3 rounded-xl border p-4">
         <div className="space-y-1">
           <label className="text-xs uppercase tracking-wide text-muted-foreground">Start Date</label>
           <input
@@ -107,7 +107,7 @@ export default function DashboardPage() {
         >
           Apply
         </button>
-      </div>
+      </div> */}
     <HeavyChartsPage graph={graph}  loading={loading}/>
     </div>
   );
